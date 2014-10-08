@@ -3,7 +3,7 @@
 * Author: Melissa Kronenberger (Spydrouge)  
 
 
-### Some Journaled Observations  
+### Some Journaled Observations about Cubiquity 
 
 I am noticing some things about cubiquity and it's editor that I would like to jot down before I do any further work, so that if they can or should be addressed later that I do not forget about them...  
   
@@ -14,6 +14,29 @@ I am noticing some things about cubiquity and it's editor that I would like to j
 * I feel like editing the inspector/editor component is definitely the key part of all of this- once I get data to import/export correctly.   
 * I feel like it is important to design exactly which functionalities need to be added to the editor, at what priorities, with what constraints for usability.  
 * I feel like blocks which have been displaced by the physics engine should 'roll' into new voxel positions to rejoin the march of cubes ;) Perhaps later.  
+
+### Some Journaled Observations about Substrate
+
+Where did it come from?   
+
+Substrate is a .dll which can be found under the References folder in the unity3d-opencog-game project folder when navigating about in MonoDevelop.  
+It is clearly designed for Minecraft. I have found the forum post introducing it [here](http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-tools/1261313-sdk-substrate-map-editing-library-for-c-net-1-3-8)  
+The github project page is [here](https://github.com/jaquadro/Substrate)  
+According to this post: Substrate is a .NET/Mono SDK written in C# for reading, writing, and manipulating data in Minecraft worlds. Substrate isolates the different levels of map data such as blocks, chunks, and regions, and natively supports modifying Alpha and Beta worlds using the same block and chunk interfaces. Substrate also provides interfaces for other data such as Entities, players, and general level data.  
+
+How do we use it?  
+
+The only file in which Substrate is referenced is "OCFileTerrainGenerator.cs"  which extracts an AnvilRegion. The chunks are extracted from the AnvilRegion and transformed into OCChunk objects.   
+We grab a three dimensional vector, check out the blocks one by one and use mcToOCBlockDictionary to convert the blocks from Substrate/Minecraft ids to our block ids. .  
+For unknown reasons to me at present, we have individual Battery and Hearth objects instead of just having them be blocks, like any of the other blocks.  
+By taking a peek at this, we can look at how Substrate (C# minecraft editor api) maps are loaded into our existing renderer.  
+My question is then, what is our in-game renderer at present (the part we are actually replacing with Cubiquity)?  
+
+### Some Journaled Observations about our 'Voxel Renderer'  
+
+We seem to handle our own personal jury-rigged Voxel Renderer that we've created from scratch. Based on the assets I see available, we are working off of a free opensource set of scripts provided as part of online tutorials and so forth.  
+To find out more information, I headed to this [Voxel Resources & Engines for Unity](http://unitycoder.com/blog/2012/10/18/voxel-resources-engines-for-unity/) page.  
+That led me to this [Youtube Video](https://www.youtube.com/watch?v=cgWM75QTr2o) which has a link to a download from dropbox.com that includes a CubicWorld .unitypackage file. This has to be our game because it has our exact assets. 
 
 ### Remembering how to clean files  
 
@@ -31,4 +54,6 @@ I did my best to get some up-to-date information on how to do source code tracki
 The solution was to change some information under Unity/Preferences (specifically, set Metadata to visible and Force Text in the editor).     
 These two options will supposedly allow me to cart my project around from computer to computer with just the Project Settings and Assets folders (everything else is in .gitignore). The idea is that when new people pull my project, they should be able to build it in its entirity from just these two folders. The options I set should make sure that important settings (such as textures/materials/script instances) get sent along with the source code (through metadata) and aren't solely embedded in the Library folder in an uncontrolled binary somewhere...  
 
+### Current Task  
 
+* Take a good look on how substrate is saving things. 
