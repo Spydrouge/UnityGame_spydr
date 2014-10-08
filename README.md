@@ -15,3 +15,20 @@ I am noticing some things about cubiquity and it's editor that I would like to j
 * I feel like it is important to design exactly which functionalities need to be added to the editor, at what priorities, with what constraints for usability.  
 * I feel like blocks which have been displaced by the physics engine should 'roll' into new voxel positions to rejoin the march of cubes ;) Perhaps later.  
 
+### Remembering how to clean files  
+
+I realized Cubiqity came with a bunch of documentation (PDF) files embedded in with it, as well as some examples that were more than a few megs in size. BLASPHEMY. I went about re-remembering how to clean Git repositories. Here's what I came back with:  
+
+(the -f in the filterbranch is to replace any existing rewrite info, and -r is for recursive)  
+
+git filter-branch -f --tree-filter 'git rm -rf Assets/Cubiqity/Documentation' HEAD  
+git reflog expire --expire=now --all  
+git gc --prune=now  
+git push origin --force -all  
+
+### Source tracking  
+I did my best to get some up-to-date information on how to do source code tracking in Unity.     
+The solution was to change some information under Unity/Preferences (specifically, set Metadata to visible and Force Text in the editor).     
+These two options will supposedly allow me to cart my project around from computer to computer with just the Project Settings and Assets folders (everything else is in .gitignore). The idea is that when new people pull my project, they should be able to build it in its entirity from just these two folders. The options I set should make sure that important settings (such as textures/materials/script instances) get sent along with the source code (through metadata) and aren't solely embedded in the Library folder in an uncontrolled binary somewhere...  
+
+
