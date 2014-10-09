@@ -98,5 +98,7 @@ namespace Cubiquity
 				VolumeDataAsset.CreateFromVoxelDatabase<ColoredCubesVolumeData>(relativePathToVoxelDatabase);
 			}
 		}
+
+
 	}
 }
