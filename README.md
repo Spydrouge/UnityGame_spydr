@@ -9,6 +9,12 @@ In general it appears that we are gutting the majority of code prefaced with OC 
 
 ### Some Journaled Observations about Cubiquity  
 
+** Unexpected Notes **
+
+* Cubiquity is not simply the Unity3D port of PolyVox (the original code that the author was working on). There is a Cubiquity  native code library itself, which is not open source or editable. This _could_ (as of yet we do not know) make it difficult to do some fun things, like forcing Cubiquity to store data with our tags. We will have to plan around any limitations this poses.  
+* The Cubiquity voxel engine stores a volume as a *Voxel Database*. 
+
+** Observations on playing with Editor **
 I am noticing some things about cubiquity and it's editor that I would like to jot down before I do any further work, so that if they can or should be addressed later that I do not forget about them...  
   
 * Holding 'Alt' and left clicking to look around is very natural for me, but doing this does not disable the editing tools for cubiquity, causing thousands of blocks to appear as I look around the map.   
