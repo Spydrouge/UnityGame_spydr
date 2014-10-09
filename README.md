@@ -1,5 +1,5 @@
 # Cubiqity-Substrate  
-* Purpose: Currently attempting to port our data from Cubiqity to Substrate  
+* Purpose: Currently attempting to port our data into Cubiqity from Substrate  
 * Author: Melissa Kronenberger (Spydrouge)  
 
 ## Journalling  
