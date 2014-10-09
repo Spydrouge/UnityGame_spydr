@@ -49,7 +49,7 @@ That led me to this [Youtube Video](https://www.youtube.com/watch?v=cgWM75QTr2o)
 
 Q: Aside from the TerrainGenerator, what other important aspects does it have? ie: How does it store sets of blocks?  
 A: Our Voxel renderer (which I am to understand is derived from something called 'pixelland' that the author did not want us to credit him for as part of the license) uses a datatype called 'BlockSet' which has its own mini-editor and so forth in game. 
-THIS may be something we <span style="color:red">want to port to Cubiquity</span>. 
+THIS may be something **we want to port to Cubiquity.**
 
 
 
@@ -73,10 +73,4 @@ I did my best to get some up-to-date information on how to do source code tracki
 The solution was to change some information under Unity/Preferences (specifically, set Metadata to visible and Force Text in the editor).     
 These two options will supposedly allow me to cart my project around from computer to computer with just the Project Settings and Assets folders (everything else is in .gitignore). The idea is that when new people pull my project, they should be able to build it in its entirity from just these two folders. The options I set should make sure that important settings (such as textures/materials/script instances) get sent along with the source code (through metadata) and aren't solely embedded in the Library folder in an uncontrolled binary somewhere...  
 
-## Task List  
 
-### Current Task  
-
-* Take a good look on how substrate is saving things. 
-    * Find our substrate data file
-	* Find cubiquity's sample data file 
