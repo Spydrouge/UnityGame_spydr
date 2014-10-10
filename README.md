@@ -9,10 +9,17 @@ In general it appears that we are gutting the majority of code prefaced with OC 
 
 ### Some Journaled Observations about Cubiquity  
 
+** Useful **
+
+* [Documentation](http://www.cubiquity.net/cubiquity-for-unity3d/1.1/docs/class_cubiquity_1_1_region.html)
+
 ** Unexpected Notes **
 
-* Cubiquity is not simply the Unity3D port of PolyVox (the original code that the author was working on). There is a Cubiquity  native code library itself, which is not open source or editable. This _could_ (as of yet we do not know) make it difficult to do some fun things, like forcing Cubiquity to store data with our tags. We will have to plan around any limitations this poses.  
-* The Cubiquity voxel engine stores a volume as a *Voxel Database*. 
+* Cubiquity is not simply the Unity3D port of PolyVox (the original code that the author was working on). There is a Cubiquity  native code library itself which wraps PolyVox, which is not open source or editable (though I believe it to be a wrapper for the most part). This _could_ (as of yet we do not know) make it difficult to do some fun things, like forcing Cubiquity to store data with our tags. We will have to plan around any limitations this poses.  
+* The Cubiquity voxel engine stores a volume as a *Voxel Database*.  
+* Cubiquity can import voxel data from 'better' Voxel editors, which might void the needs listed below under "Observations on playing with Editor." Specifically it lists Magica Voxel and says that it comes with the ability to import from Magica Voxel, Voxelap, and Images Slices automatically using a command prompt!  
+* Cubiquity volumes have their Width/Height/Depth set through Create Terrain Volume Data or Create Colored Cubes Volume Data.  Cubiquity says that 512x512x64 is *the limit* for Volume Data for a reasonable desktop PC. 
+    * While there is support in PolyVox for infinite terrain, it is NOT yet exposed to Cubiquity 
 
 ** Observations on playing with Editor **
 I am noticing some things about cubiquity and it's editor that I would like to jot down before I do any further work, so that if they can or should be addressed later that I do not forget about them...  
@@ -78,5 +85,7 @@ git push origin --force -all
 I did my best to get some up-to-date information on how to do source code tracking in Unity.     
 The solution was to change some information under Unity/Preferences (specifically, set Metadata to visible and Force Text in the editor).     
 These two options will supposedly allow me to cart my project around from computer to computer with just the Project Settings and Assets folders (everything else is in .gitignore). The idea is that when new people pull my project, they should be able to build it in its entirity from just these two folders. The options I set should make sure that important settings (such as textures/materials/script instances) get sent along with the source code (through metadata) and aren't solely embedded in the Library folder in an uncontrolled binary somewhere...  
+
+
 
 
