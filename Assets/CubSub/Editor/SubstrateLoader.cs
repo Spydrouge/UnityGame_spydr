@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.Collections;
 
@@ -9,87 +9,50 @@ using System.Text;
 
 using Cubiquity.Impl;
 
-//Purpose: MenuOptions for bringing in Substrate maps to Cubiquity
+//Purpose: It is useful to know how to create my own EditorWindow, even if I decided to go with menu options for the code I'm currently working on
 //Author: Melissa Kronenberger (Spydrouge)
 
 namespace CubSub
 {	
-	public class SubstrateLoader : MonoBehaviour
+	//By Deriving from EditorWindow, I have created an independent piece of software accessible at edit time that does not have to be attached to a gameobject, like ColoredCubeVolume
+	//It will be its own panel, and hopefully more useful as a result. 
+	public class SubstrateLoader : EditorWindow
 	{
-		//Use C# notation to attach all this code to an item in the menu
-		[MenuItem ("Assets/Create/Colored Cubes Volume Data/From Substrate Data")]
-		static void CreateVDBFromDat()
-		{	
-			//GET DA PATH (Namespaces For The Win)
-			string toDat = EditorUtility.OpenFilePanel("Choose a Substrate (.dat) file to load", Paths.VoxelDatabases, "dat");
+		protected String _toDat = "xxx.dat";
+		protected String _toVDB = "xxx.vdb";
 
-			//Something went horribly, horribly wrong. Or we hit cancel. Give up and abandon ship!
-			if(toDat.Length == 0) return;
-
-
-		}
-
-		[MenuItem ("Assets/Create/Colored Cubes Volume Data/Empty Volume Data...")]
-		static void CreateEmptyColoredCubesVolumeDataAsset()
-		{			
-			ScriptableWizard.DisplayWizard<CreateEmptyColoredCubesVolumeDataAssetWizard>("Create Colored Cubes Volume Data", "Create");
-		}
-
-
-
-		[MenuItem ("GameObject/Create Other/Colored Cubes Volume")]
-		static void CreateColoredCubesVolume()
+		//This sexy code puts this EditorWindow into Unity's Menus (ya know, at the top of the program)
+		[MenuItem ("Window/OpenCog/SubstrateLoader")]
+		
+		//LOOK AT ME COPY-PASTING UNITY CODE, DOH!
+		//(this function is built into Unity, and makes sure if we hit the same menu option twice, we
+		// don't bring up two different windows, but rather create the 1st one or re-select the 1st one if
+		// it already exists.)
+		public static void ShowWindow()
 		{
-			int width = 256;
-			int height = 32;
-			int depth = 256;
+			EditorWindow.GetWindow(typeof(SubstrateLoader));
+		}
+		
+		//Dis is vhere de actual 'look' of the panel goes.
+		public void OnGUI()
+		{
 			
-			ColoredCubesVolumeData data = VolumeDataAsset.CreateEmptyVolumeData<ColoredCubesVolumeData>(new Region(0, 0, 0, width-1, height-1, depth-1));
-			
-			GameObject coloredCubesGameObject = ColoredCubesVolume.CreateGameObject(data, true, true);
-			
-			// And select it, so the user can get straight on with editing.
-			Selection.activeGameObject = coloredCubesGameObject;
-			
-			int floorThickness = 8;
-			QuantizedColor floorColor = new QuantizedColor(192, 192, 192, 255);
-			
-			for(int z = 0; z <= depth-1; z++)
+			GUILayout.Label("Substrate", EditorStyles.boldLabel);
+			_toDat = EditorGUILayout.TextField("Path to .dat file", _toDat);
+
+			GUILayout.Label("Voxel Database", EditorStyles.boldLabel);
+			_toVDB = EditorGUILayout.TextField("Path to .vdb file", _toVDB);
+
+			if(GUILayout.Button("Import"))
 			{
-				for(int y = 0; y < floorThickness; y++)
-				{
-					for(int x = 0; x <= width-1; x++)
-					{
-						data.SetVoxel(x, y, z, floorColor);
-					}
-				}
+				ImportFunction();
 			}
 		}
 
-
-		//public static VolumeDataType CreateEmptyVolumeData<VolumeDataType>(Region region, string pathToVoxelDatabase = null) where VolumeDataType : VolumeData
-
-		//CAN USE FOR OUTPUT OF VBS
-		/* USEFUL INFO (shows how to call Createemptyvolumedata more specifically, and not use randomly generated names. 
-		 * public static VolumeDataType CreateEmptyVolumeData<VolumeDataType>(Region region) where VolumeDataType : VolumeData
-		{			
-			VolumeDataType data = VolumeData.CreateEmptyVolumeData<VolumeDataType>(region, Impl.Utility.GenerateRandomVoxelDatabaseName());
-			CreateAssetFromInstance<VolumeDataType>(data);			
-			return data;
+		public void ImportFunction()
+		{
 		}
-		*
-		*/
-			
-			//CAN USE FOR INPUT OF DATS
-			/* 
-		 * public static VolumeDataType CreateFromVoxelDatabase<VolumeDataType>(string relativePathToVoxelDatabase) where VolumeDataType : VolumeData
-		{			
-			VolumeDataType data = VolumeData.CreateFromVoxelDatabase<VolumeDataType>(relativePathToVoxelDatabase);
-			string assetName = Path.GetFileNameWithoutExtension(relativePathToVoxelDatabase);
-			CreateAssetFromInstance<VolumeDataType>(data, assetName);
-			return data;
-		}
-		*
-		*/
+		
+	
 	}
 }
