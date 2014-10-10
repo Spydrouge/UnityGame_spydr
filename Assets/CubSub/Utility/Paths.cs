@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 using System;
 using System.Collections;
@@ -23,6 +23,11 @@ namespace CubSub
 		public static string VDBFiles
 		{
 			get { return VoxelDatabases + "/vdbs"; }
+		}
+
+		public static string MAPFolders
+		{
+			get{return CubSub + "/SubstrateData";}
 		}
 	}
 }

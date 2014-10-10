@@ -177,7 +177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92724a2f276b54f44877f83b61cf602a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 613258848}
+  material: {fileID: 1168870453}
   mCastShadows: 1
   mReceiveShadows: 1
 --- !u!114 &269008497
@@ -191,7 +191,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27a2f374dab8c1140bbc2e9f918cba37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mData: {fileID: 11400000, guid: 7faf5952ae5841c43bd1daca110848b6, type: 2}
+  mData: {fileID: 0}
 --- !u!4 &269008498
 Transform:
   m_ObjectHideFlags: 0
@@ -231,7 +231,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
---- !u!21 &613258848
+--- !u!21 &1168870453
 Material:
   serializedVersion: 3
   m_ObjectHideFlags: 0
