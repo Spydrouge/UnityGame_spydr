@@ -1,17 +1,29 @@
 ********************************************************************************
 *                             Initializing Cubiquity                           *
 ********************************************************************************
-[12:57:02, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_0.asset'
-[12:57:03, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_1.asset'
-[12:58:28, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:58:28, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:59:00, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_0.asset'
-[12:59:00, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:59:30, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_1.asset'
-[12:59:30, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[13:01:22, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_1.asset'
-[13:01:22, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[13:01:52, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_1.asset'
-[13:01:53, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[13:02:15, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_0.asset'
-[13:02:15, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[15:33:09, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_1.vdb'
+[15:33:09, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[16:11:56, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_1.vdb'
+[16:11:56, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[16:12:56, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_1.vdb'
+[16:12:56, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[16:13:29, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/NewVoxelDatabase.asset_0extension'
+[16:13:30, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/NewVoxelDatabase.asset_1extension'
+[16:14:25, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[16:14:25, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[16:14:26, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_1.vdb'
+[16:14:26, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[16:14:48, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/NewVoxelDatabase.asset_0.vdb'
+[16:14:49, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/NewVoxelDatabase.asset_1.vdb'
+[16:15:30, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[16:15:30, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[16:15:31, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_1.vdb'
+[16:15:31, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[16:17:30, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/Examples/VoxeliensColoredCubes.vdb'
+[16:20:57, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[16:22:15, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/NewVDB_0.vdb'
+[16:35:45, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+********************************************************************************
+*                             Shutting down Cubiquity                          *
+********************************************************************************
+
