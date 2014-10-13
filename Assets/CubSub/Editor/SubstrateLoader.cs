@@ -39,27 +39,29 @@ namespace CubSub
 		//dictonary mapping substrate values to quantized colors for Cubiquity
 		protected Dictionary<int, QuantizedColor> subToCubDict = new Dictionary<int, QuantizedColor>()
 		{ 	{0, HexColor.QuantHex("00000000")},  //This should be an empty block. I watched as it was used in the 'delete cube' function of Cubiquity (Quantized color(0,0,0,0))
-			{1, HexColor.QuantHex("FFFFFFFF")},
-			{2, HexColor.QuantHex("FFFFFFFF")},
-			{3, HexColor.QuantHex("FFFFFFFF")},
-			{4, HexColor.QuantHex("FFFFFFFF")},
-			{5, HexColor.QuantHex("FFFFFFFF")},
-			{6, HexColor.QuantHex("FFFFFFFF")},
-			{7, HexColor.QuantHex("FFFFFFFF")},
-			{8, HexColor.QuantHex("FFFFFFFF")},
-			{9, HexColor.QuantHex("FFFFFFFF")},
-			{10, HexColor.QuantHex("FFFFFFFF")},
-			{11, HexColor.QuantHex("FFFFFFFF")},
-			{12, HexColor.QuantHex("FFFFFFFF")},
-			{16, HexColor.QuantHex("FFFFFFFF")},
-			{17, HexColor.QuantHex("FFFFFFFF")},
-			{18, HexColor.QuantHex("FFFFFFFF")},
-			{26, HexColor.QuantHex("FFFFFFFF")},		
-			{35, HexColor.QuantHex("FFFFFFFF")},
-			{45, HexColor.QuantHex("FFFFFFFF")},
-			{46, HexColor.QuantHex("FFFFFFFF")},
-			{62, HexColor.QuantHex("FFFFFFFF")},
-			{90, HexColor.QuantHex("FFFFFFFF")},
+			{1, HexColor.QuantHex("636573FF")},  	//Stone
+			{2, HexColor.QuantHex("19E619FF")},		//Grass
+			{3, HexColor.QuantHex("8F4700FF")},  	//Dirt
+			{4, HexColor.QuantHex("8A8C96FF")},		//Cobble
+			{5, HexColor.QuantHex("CCAA00FF")},		//Wood
+			{6, HexColor.QuantHex("CBFF96FF")},		//Sapling
+			{7, HexColor.QuantHex("000A24FF")},		//Bedrock
+			{8, HexColor.QuantHex("4064C7FF")},		//Flowing Water
+			{9, HexColor.QuantHex("1B24A6FF")},		//Water
+			{10, HexColor.QuantHex("ED590EFF")},	//Flowing Lava
+			{11, HexColor.QuantHex("D94800FF")},	//Lava
+			{12, HexColor.QuantHex("F7F2C8FF")},	//Sand
+			{16, HexColor.QuantHex("1A1616FF")},	//Coal 
+			{17, HexColor.QuantHex("FFCC00FF")},	//Log
+			{18, HexColor.QuantHex("39A377FF")},	//Leaves
+			{26, HexColor.QuantHex("FFB8E0FF")},	//Bed
+			{35, HexColor.QuantHex("E7E8D8FF")},	//Wool
+			{43, HexColor.QuantHex("CCCCCCFF")},	//Stone slab
+			{45, HexColor.QuantHex("753437FF")},	//Brick
+			{46, HexColor.QuantHex("FF1C27FF")},	//TNT
+			{62, HexColor.QuantHex("2E2D2DFF")},	//Furnace
+			{81, HexColor.QuantHex("67ED00FF")},	//Cactus
+			{90, HexColor.QuantHex("C795F0FF")},	//Portal
 		};
 
 		//This sexy code puts this EditorWindow into Unity's Menus (ya know, at the top of the program)
@@ -175,7 +177,9 @@ namespace CubSub
 				//therefore preserving data of unexpected blocks with an alpha of 99 seemed clever ;)
 
 				//eh, fix/replaced/tune it later if that's what one wishes. 
-				subToCubDict.Add (subBlockType, new QuantizedColor(255, 255, (byte)subBlockType, 99));
+				subToCubDict.Add (subBlockType, new QuantizedColor((byte)255, (byte)255, (byte)subBlockType, (byte)255));
+
+				Debug.Log("Unable to find block " + subBlockType.ToString () + ". Attempting to create dummy block in yellow.");
 
 				return subToCubDict[subBlockType];
 			}
@@ -224,9 +228,9 @@ namespace CubSub
 				//anyway, make sure we create the new data with the proper file name!!!
 				ColoredCubesVolumeData data = null;
 				if(newAssets.Length > 1)
-					data = VolumeData.CreateEmptyVolumeData<ColoredCubesVolumeData>(new Region(0, 0, 0, xSize-1, ySize-1, zSize-1), _toVDB + "_" + regionCount.ToString() + ".asset");
+					data = VolumeData.CreateEmptyVolumeData<ColoredCubesVolumeData>(new Region(0, 0, 0, xSize-1, ySize-1, zSize-1), _toVDB + "_" + regionCount.ToString() + ".vdb");
 				else
-					data = VolumeData.CreateEmptyVolumeData<ColoredCubesVolumeData>(new Region(0, 0, 0, xSize-1, ySize-1, zSize-1), _toVDB + ".asset");
+					data = VolumeData.CreateEmptyVolumeData<ColoredCubesVolumeData>(new Region(0, 0, 0, xSize-1, ySize-1, zSize-1), _toVDB + ".vdb");
 
 				//Mayday!
 				if(data == null)
@@ -311,21 +315,32 @@ namespace CubSub
 			//we just have to make the new asset(s) permenant
 
 			//so grab where we want to save the asset(s)
-			this._toAsset = EditorUtility.SaveFilePanel("Choose a place to save the Voxel Database.", Paths.VoxelDatabases, "NewVoxelDatabase", "");
+			this._toAsset = EditorUtility.SaveFilePanel("Choose a place to save the Voxel Database", Paths.VoxelDatabases, "NewVoxelDatabase", "");
+
+			if (_toAsset.StartsWith(Application.dataPath)) {
+				_toAsset = "Assets" + _toAsset.Substring(Application.dataPath.Length);
+			}
+			else {
+				throw new System.ArgumentException("SubstrateLoader was asked to save a VoxelDatabase outside the Asset Folder", "absolutePath");
+			}
 
 			//if we have more than one asset, we want to append an enumerator after the name (_1, _2, _3, etc)
+			String path = "";
 			if(newAssets.Length > 1)
 			{
 				regionCount = 0;
 				foreach(ColoredCubesVolumeData data in newAssets)
 				{
-					AssetDatabase.CreateAsset(data, _toAsset + "_" + regionCount.ToString() + ".asset");
+					path = _toAsset + "_" + regionCount.ToString()+ ".asset";
+					Debug.Log (path);
+
+					AssetDatabase.CreateAsset(data, path);
 					regionCount++;
 				}
 			}
 			else
 			{
-				AssetDatabase.CreateAsset(newAssets[0], Paths.VoxelDatabases + ".asset");
+				AssetDatabase.CreateAsset(newAssets[0], _toAsset + ".asset");
 			}
 
 			//Sellect the VoxelDatabase.asset we just created so we can drag/drop it to where we wish
