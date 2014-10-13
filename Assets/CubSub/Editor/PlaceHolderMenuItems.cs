@@ -97,5 +97,10 @@ namespace CubSub
 		}
 		*
 		*/
+
+		/*
+		 * paintColor = EditorGUILayout.ColorField("Voxel Color:", paintColor);
+				(QuantizedColor)paintColor
+			*/
 	}
 }

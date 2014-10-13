@@ -177,7 +177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92724a2f276b54f44877f83b61cf602a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 1168870453}
+  material: {fileID: 1147259031}
   mCastShadows: 1
   mReceiveShadows: 1
 --- !u!114 &269008497
@@ -231,7 +231,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
---- !u!21 &1168870453
+--- !u!21 &1147259031
 Material:
   serializedVersion: 3
   m_ObjectHideFlags: 0
