@@ -1,33 +1,13 @@
 ********************************************************************************
 *                             Initializing Cubiquity                           *
 ********************************************************************************
-[11:59:51, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdbs/New Voxel Database_0.vdb'
-[11:59:51, Error  ]: Encountered 'unable to open database file' (error code 14) when executing 'sqlite3_open_v2(pathToNewVoxelDatabase.c_str(), &(voxelDatabase->mDatabase), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL)'
-[11:59:51, Error  ]: Caught 'SQLiteError' at C interface. Message reads: "Encountered 'unable to open database file' (error code 14) when executing 'sqlite3_open_v2(pathToNewVoxelDatabase.c_str(), &(voxelDatabase->mDatabase), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL)'"
-[11:59:52, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdbs/New Voxel Database_1.vdb'
-[11:59:52, Error  ]: Encountered 'unable to open database file' (error code 14) when executing 'sqlite3_open_v2(pathToNewVoxelDatabase.c_str(), &(voxelDatabase->mDatabase), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL)'
-[11:59:52, Error  ]: Caught 'SQLiteError' at C interface. Message reads: "Encountered 'unable to open database file' (error code 14) when executing 'sqlite3_open_v2(pathToNewVoxelDatabase.c_str(), &(voxelDatabase->mDatabase), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL)'"
-[12:05:51, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_0.vdb'
-[12:05:52, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_1.vdb'
-[12:06:29, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:06:29, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:06:31, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_0.vdb'
-[12:06:32, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_1.vdb'
-[12:10:10, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:10:22, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:12:12, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_1.vdb'
-[12:12:12, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:15:43, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_1.vdb'
-[12:15:43, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:16:02, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_1.vdb'
-[12:16:02, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:17:19, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_0.vdb'
-[12:17:20, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_1.vdb'
-[12:23:48, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database.vdb'
-[12:24:02, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:24:11, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[12:24:34, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database.vdb'
-[12:24:53, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[14:05:26, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/../CubSub/VoxelDatabases/vdb/New Voxel Database_0.vdb'
+[14:05:26, Error  ]: Encountered 'unable to open database file' (error code 14) when executing 'sqlite3_open_v2(pathToExistingVoxelDatabase.c_str(), &(voxelDatabase->mDatabase), flags, NULL)'
+[14:05:26, Error  ]: Caught 'SQLiteError' at C interface. Message reads: "Encountered 'unable to open database file' (error code 14) when executing 'sqlite3_open_v2(pathToExistingVoxelDatabase.c_str(), &(voxelDatabase->mDatabase), flags, NULL)'"
+[14:07:26, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_0.vdb'
+[14:07:27, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_1.vdb'
+[14:10:15, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[14:10:15, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
 ********************************************************************************
 *                             Shutting down Cubiquity                          *
 ********************************************************************************

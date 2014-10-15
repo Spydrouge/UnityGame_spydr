@@ -32,10 +32,11 @@ namespace CubSub
 
 		public static void PingDirectories()
 		{
-			Debug.Log ("CubSub: " + CubSub + " | " + Directory.Exists (CubSub));
-			Debug.Log ("VoxelDatabases: " + VoxelDatabases + " | " + Directory.Exists (VoxelDatabases));
-			Debug.Log ("VDBFiles: " + VDBFiles + " | " + Directory.Exists (VDBFiles));
-			Debug.Log ("MAPFolders: " + MAPFolders + " | " + Directory.Exists (MAPFolders));
+			Debug.Log ("Checking the existance of Paths,\n Click to see they all register as 'True'" +
+			"\nCubSub: " + CubSub + " : " + Directory.Exists (CubSub) +
+			"\nVoxelDatabases: " + VoxelDatabases + " : " + Directory.Exists (VoxelDatabases) +
+			"\nVDBFiles: " + VDBFiles + " : " + Directory.Exists (VDBFiles) +
+			"\nMAPFolders: " + MAPFolders + " : " + Directory.Exists (MAPFolders));
 		}
 
 		//Okay here are our steps to homogenizing path input AND dealing with a situation where one file name

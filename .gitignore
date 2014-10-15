@@ -1,3 +1,17 @@
+
+
+# ===================================== #
+# While Testing/Programming.... #
+# ===================================== #
+
+# Many vdbs are going to be generated that we don't want to push. Especially given that they are binary. #
+# Later on, we may want to remove this one.#
+*.vdb
+*.vdb.meta
+
+
+
+# =============== #
 # Unity generated #
 # =============== #
 /Temp/
@@ -22,6 +36,8 @@ ExportedObj/
 *.user
 *.unityproj
 *.booproj
+
+
  
 # ============ #
 # OS generated #

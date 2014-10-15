@@ -22,7 +22,7 @@ namespace CubSub
 {	
 	//By Deriving from EditorWindow, I have created an independent piece of software accessible at edit time that does not have to be attached to a gameobject, like ColoredCubeVolume
 	//It will be its own panel, and hopefully more useful as a result. 
-	public class SubstrateLoader : EditorWindow
+	public class SubstrateConverter : EditorWindow
 	{
 
 		//Let's store this info!
@@ -71,14 +71,14 @@ namespace CubSub
 
 		//This sexy code puts this EditorWindow into Unity's Menus (ya know, at the top of the program)
 		//And attached this 'Show Window' function to clicking the menu item
-		[MenuItem ("Window/OpenCog/SubstrateLoader")]
+		[MenuItem ("Window/OpenCog/Substrate Converter")]
 		public static void ShowWindow()
 		{
 			//LOOK AT ME COPY-PASTING UNITY CODE, DOH!
 			//(this function is built into Unity, and makes sure if we hit the same menu option twice, we
 			// don't bring up two different windows, but rather create the 1st one or re-select the 1st one if
 			// it already exists.)
-			EditorWindow.GetWindow(typeof(SubstrateLoader));
+			EditorWindow.GetWindow(typeof(SubstrateConverter));
 
 			//debugging
 			Paths.PingDirectories();
@@ -88,7 +88,7 @@ namespace CubSub
 		public void OnGUI()
 		{
 			//change the little folder topper that displays the title of the Editor Window
-			title = "Import Substrate";
+			title = "Substrate Converter";
 
 
 			//------------------------
@@ -158,7 +158,7 @@ namespace CubSub
 
 			//This is the final conversion button
 			GUILayout.Label("Load Substrate as Voxel Database", EditorStyles.boldLabel);
-			GUILayout.Label("When satisfied with the above settings, click to Convert the Substrate Map folder to Cubiquity Voxel Database (.vdb) format. You will be prompted to save an additional Cubiquity Volume Data asset on a successful conversion.", EditorStyles.wordWrappedMiniLabel);
+			GUILayout.Label("When satisfied with the above settings, click to Convert the Substrate Map folder to Cubiquity Voxel Database. The .asset file(s) this creates will be saved at: " + Paths.VoxelDatabases, EditorStyles.wordWrappedMiniLabel);
 			if(GUILayout.Button("Convert", GUILayout.Width (100)))
 			{
 				ConvertMap();
@@ -199,24 +199,30 @@ namespace CubSub
 
 		//this interesting little function should, in the event that we try to overwrite a vdb, allow us to find out if there
 		//is a ColoredCubesVolumeData .asset which might have the vdb currently checked out.
-		//we can then attempt to destroy the data in order to release the vdb for deletion. 
+		//we can then attempt to close/destroy the data in order to release the vdb for deletion. 
 
-		//notice this file will only return ONE representative. This code is not robust for situations in which two 
+		//notice this function will only return ONE representative. This code is not singularly robust for situations in which two 
 		//ColoredCubesVolumeDatas are attempting to access the same vdb in read-only mode. 
 		public ColoredCubesVolumeData FindVolumeMatchingPath(String vdbPath)
 		{
-			Debug.Log ("Beginning search for ColoredCubesVolumeData which matches vdbPath.");
+			//This Resources function allows us to nab all .assets, .prefabs, .etc not just stuff that's currently on the loaded scene.
+			//We want to get an array of all ColoredCubesVolumeData objects there are; any of them might have our vdb open
+
+			//Debug.Log ("Beginning search for ColoredCubesVolumeData which matches vdbPath.");
 			ColoredCubesVolumeData[] datas = Resources.FindObjectsOfTypeAll(typeof(ColoredCubesVolumeData)) as ColoredCubesVolumeData[];
 			foreach(ColoredCubesVolumeData data in datas)
 			{
-				Debug.Log ("Comparing the strings from Data: "  + data.fullPathToVoxelDatabase + " && VDBPath: " + vdbPath);
+				//We have the path to the vdb we want to destroy. The datas each keep paths to their vdbs. Everything is in absolute path
+				//form. Therefore we can use a straightforward string compare to see if any data has our vdb open
+
+				//Debug.Log ("Comparing the strings from Data: "  + data.fullPathToVoxelDatabase + " && VDBPath: " + vdbPath);
 				if(String.Compare (data.fullPathToVoxelDatabase, vdbPath) == 0)
 				{
-					Debug.Log ("Match found");
+					//Debug.Log ("Match found");
 					return data;
 				}
 			}
-			Debug.Log ("Match not found");
+			//Debug.Log ("Match not found");
 			return null;
 		}
 
@@ -283,29 +289,35 @@ namespace CubSub
 				if(File.Exists (pathVDB))
 				{
 
-					Debug.Log ("Found a VDB with the same name as "+ pathVDB + " and now attempting to handle things...");
+					Debug.Log ("A .vdb by this name already exists. Searching through .asset files to see if it is currently opened.");
 
 					//Alright, so we're going to do some hacking and see if we can figure out how to delete the vdbs live.
 					//this is gonna look for the .asset file that the vdb is attached to...
 					ColoredCubesVolumeData oldData = FindVolumeMatchingPath(pathVDB);
 
-					//if we managed to find the .asset that links to this vdb, 
-					if(oldData != null)
+					//if we managed to find the .asset that links to this vdb, we must BURN IT MUAHAHAHAHHAHAA
+					//I've changed if(oldData) to while(oldData) to account for the possibility that multiple Data .assets
+					//might have the vdb open in read only mode 
+
+					while(oldData != null)
 					{
-						Debug.Log ("Found an old .asset attached to the VDB; attempting to shut it down.");
+						Debug.Log ("Successfully found an .asset reading from the .vdb. Attempting to shut it down to release the .vdb.");
 
 						//I'm going out on a limb here to see if this works... If it doesn't, we can fudge around a little
 						//more or just try to fail gracefully.
 						oldData.ShutdownCubiquityVolume();
 
-						Debug.Log ("Attempting to delete .asset");
+						//Debug.Log ("Attempting to delete .asset");
 
 						//now let's try and delete the asset itself so we get no linking errors...
 						AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(oldData));
 
+						//check to make sure no one else had this vdb open (it could have been read only!)
+						oldData = FindVolumeMatchingPath(pathVDB);
+
 					}
 
-					Debug.Log ("Attempting to delete the old VDB");
+					Debug.Log ("Attempting to delete the old .vdb under the assumption it is no longer open. If the deletion fails, the conversion will not proceed. The .vdb can be deleted manually with the Unity Editor closed, or you can specify a different save name for the .vdb.");
 
 					//When this error is thrown, the entire conversion attempt stops; and we don't corrupt our existing data.
 					File.Delete (pathVDB);
@@ -428,7 +440,7 @@ namespace CubSub
 			EditorUtility.FocusProjectWindow ();
 			Selection.activeObject = newAssets[0];
 
-			Debug.Log ("SubstrateLoader: Regions Loaded.");
+			Debug.Log ("Conversion attempt was successful");
 		}
 		
 	
