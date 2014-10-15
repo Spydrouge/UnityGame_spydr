@@ -34,8 +34,12 @@ namespace CubSub
 
 		//any additional optioins we want to add
 		protected bool _options = false;
-		protected int _skyOffset = 80;
-		protected int _defaultSkyOffset = 80;
+
+		protected int _clipFromBelow = 60;
+		protected int _defaultClipFromBelow = 60;
+
+		protected int _clipFromAbove = 150;
+		protected int _defaultClipFromAbove = 150;
 
 		//hard code in some stuff we know about substrate, to keep track of it. 
 		protected int subChunkSize = 16;
@@ -142,9 +146,13 @@ namespace CubSub
 			{
 				GUILayout.BeginHorizontal();
 				{
-					_skyOffset = EditorGUILayout.IntField("Vertical Offset:", _skyOffset, EditorStyles.numberField);
-					if(GUILayout.Button("Default", GUILayout.Width(100))) _skyOffset = _defaultSkyOffset;
-
+					_clipFromBelow = EditorGUILayout.IntField("Clip off bottom:", _clipFromBelow, EditorStyles.numberField);
+					_clipFromAbove = EditorGUILayout.IntField("Clip off top:", _clipFromAbove, EditorStyles.numberField);
+					if(GUILayout.Button("Defaults", GUILayout.Width(100))) 
+					{
+						_clipFromBelow = _defaultClipFromBelow;
+						_clipFromAbove = _defaultClipFromAbove;
+					}
 				}
 				GUILayout.EndHorizontal();
 
@@ -267,7 +275,7 @@ namespace CubSub
 				//Chunk Size * chunks in region.... map is automatically 256 deep
 				int xSize = region.XDim * this.subChunkSize;
 				int zSize = region.ZDim * this.subChunkSize;
-				int ySize = this.subMapDepth;
+				int ySize = this.subMapDepth - _clipFromAbove;
 
 
 				//it appears that while minecraft prefers xzy, cubiquity prefers xyz (height compes second)
@@ -381,13 +389,13 @@ namespace CubSub
 						}
 								
 						//there is only 1 chunk on the y axis, so go straight through the blocks without worrking about kChunks or kBlocks
-						for(int k = 0; k < ySize; k++)
+						for(int k = _clipFromBelow; k < ySize; k++)
 						{
 							//NAB THE ID! Using the Substrate block collections 'get id'
 							int blockId = blocks.GetID (iBlock, k, jBlock);
 
 							///Translate the ID using our personal 'ConvertBlock' and throw that quantizedColor variable into Cubiquity's voxeldata collection!
-							data.SetVoxel(iBlock, k, jBlock, ConvertBlock (blockId));
+							data.SetVoxel(iBlock, k-_clipFromBelow, jBlock, ConvertBlock (blockId));
 						}//K/Y loop
 						
 					}//J/Z loop
