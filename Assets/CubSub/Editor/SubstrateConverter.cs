@@ -36,10 +36,10 @@ namespace CubSub
 		protected bool _options = false;
 
 		protected int _clipFromBelow = 60;
-		protected int _defaultClipFromBelow = 60;
+		protected const int _defaultClipFromBelow = 60;
 
 		protected int _clipFromAbove = 150;
-		protected int _defaultClipFromAbove = 150;
+		protected const int _defaultClipFromAbove = 150;
 
 		//hard code in some stuff we know about substrate, to keep track of it. 
 		protected int subChunkSize = 16;
@@ -94,6 +94,10 @@ namespace CubSub
 			//change the little folder topper that displays the title of the Editor Window
 			title = "Substrate Converter";
 
+			//useful helpers later on, will temporary hold norms while I shrink/expand things
+			float labelWidth;
+			float fieldWidth;
+
 
 			//------------------------
 			// SUBSTRATE MAP
@@ -140,22 +144,63 @@ namespace CubSub
 			GUILayout.Label("Additional Parameters", EditorStyles.boldLabel);
 			_options = EditorGUILayout.Foldout(_options, "Show", EditorStyles.foldout);
 
+			//I want to make a note here and mention that we are basically sending a bunch of render commands with each
+			//EditorGUILayout.IntField. We're not just setting values. Therefore, setting indent here to 1, and later to 0,
+			//or what have you really does have an immediate effect on what comes after it. 
 			EditorGUI.indentLevel = 1;
 
 			if(_options)
 			{
-				GUILayout.BeginHorizontal();
-				{
-					_clipFromBelow = EditorGUILayout.IntField("Clip off bottom:", _clipFromBelow, EditorStyles.numberField);
-					_clipFromAbove = EditorGUILayout.IntField("Clip off top:", _clipFromAbove, EditorStyles.numberField);
-					if(GUILayout.Button("Defaults", GUILayout.Width(100))) 
-					{
-						_clipFromBelow = _defaultClipFromBelow;
-						_clipFromAbove = _defaultClipFromAbove;
-					}
-				}
-				GUILayout.EndHorizontal();
+				//It is possible to clip voxels off the top and bottom (and possibly in the future other dimensions)
+				//We are going to list those controls now
+				EditorGUILayout.LabelField("Voxels to clip", EditorStyles.boldLabel);
+				{ //welcome to the land of organizational brackets that do nothing.
 
+
+					//We want these properties to have smaller fields than others :3
+					labelWidth = EditorGUIUtility.labelWidth;
+					fieldWidth = EditorGUIUtility.fieldWidth;
+					
+					EditorGUIUtility.labelWidth = 75f;
+					EditorGUIUtility.fieldWidth = 25f;
+
+					//Top and Bottom
+					GUILayout.BeginHorizontal();
+					{
+						//The actual GUI Fields
+						_clipFromBelow = EditorGUILayout.IntField("Bottom", _clipFromBelow);
+						_clipFromAbove = EditorGUILayout.IntField("Top", _clipFromAbove);
+
+						//create an option to quickly reset to default (recommended, and OpenCog/Substrate specific) dimensions. 
+						if(GUILayout.Button("Defaults", GUILayout.Width(100))) 
+						{
+							_clipFromBelow = _defaultClipFromBelow;
+							_clipFromAbove = _defaultClipFromAbove;
+						}
+					}
+					GUILayout.EndHorizontal();
+
+					GUILayout.BeginHorizontal();
+					{
+						//Watch as this empty label imposes its indentation on the following button,
+						//which otherwise would completely ignore my indentation attempts!
+						//MUAHAHAHAHAHHAHAHAH!!!!
+						EditorGUILayout.LabelField("", EditorStyles.label, GUILayout.Width(10));
+
+						//create an option to quickly zero out all the clip dimensions
+						if(GUILayout.Button("Zero Out (No Voxels Clipped)"))
+						{
+							_clipFromBelow = 0;
+							_clipFromAbove = 0;
+						}
+					}
+					GUILayout.EndHorizontal();
+
+					//return these attributes to normal
+					EditorGUIUtility.labelWidth = labelWidth;
+					EditorGUIUtility.fieldWidth = fieldWidth;
+				}
+				
 			}
 			EditorGUILayout.Separator();
 			EditorGUI.indentLevel = 0;
