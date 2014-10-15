@@ -26,9 +26,11 @@ namespace CubSub
 	{
 
 		//Let's store this info!
-		protected String _toSubstrateMap = "/folder/";
-		protected String _toVDB = "xxx.vdb";
-		protected String _toAsset = "xxx.asset";
+		protected String _toSubstrateMap = "";
+
+		protected string _saveName = "New Voxel Database";
+		protected String _toVDB = Paths.VDBFiles +"/New Voxel Database";
+		protected String _toAsset = Paths.VoxelDatabases +"/New Voxel Database";
 
 		//any additional optioins we want to add
 		protected bool _options = false;
@@ -77,6 +79,9 @@ namespace CubSub
 			// don't bring up two different windows, but rather create the 1st one or re-select the 1st one if
 			// it already exists.)
 			EditorWindow.GetWindow(typeof(SubstrateLoader));
+
+			//debugging
+			Paths.PingDirectories();
 		}
 		
 		//Dis is vhere de actual 'look' of the panel goes. OnGUI() is called like an Update() 
@@ -93,29 +98,32 @@ namespace CubSub
 			GUILayout.Label("Substrate", EditorStyles.boldLabel);
 			GUILayout.BeginHorizontal(); //Watch me use {}s with absolutely no code-related reason and no functionality whatsoever!
 			{
-				_toSubstrateMap = EditorGUILayout.TextField("Input Map (folder)", _toSubstrateMap);
+				_toSubstrateMap = EditorGUILayout.TextField("Input Map (directory)", _toSubstrateMap);
 
 				if(GUILayout.Button("Browse", GUILayout.Width(100)))
 				{
-					_toSubstrateMap = EditorUtility.OpenFolderPanel("Choose a Substrate map folder to load", Paths.MAPFolders, "mapFolder");
+					_toSubstrateMap = EditorUtility.OpenFolderPanel("Choose a Substrate map directory to load", Paths.MAPFolders, "mapFolder");
 			
+					//we can probably do some errorchecking here to help users navigate to the correct directory
 				}
 			}
 			GUILayout.EndHorizontal();
 
 			//------------------------
-			// VDB/ CUBIQUITY MAP
+			// VDB/ CUBIQUITY MAP / and asset
 			//------------------------
 			//Grab the location for the .vdb file we'll want to save at
 			GUILayout.Label("Voxel Database", EditorStyles.boldLabel);
 			GUILayout.BeginHorizontal();
 			{
-				_toVDB = EditorGUILayout.TextField("Save location and name", _toVDB);
+				_saveName = EditorGUILayout.TextField("Name to Save As", _saveName);
+				_toVDB = Paths.VDBFiles + "/" +_saveName;
+				_toAsset = Paths.VoxelDatabases + "/" + _saveName;
 
-				if(GUILayout.Button("Browse", GUILayout.Width(100)))
-				{
-					_toVDB = EditorUtility.SaveFilePanel("Choose a place to save the Voxel Database file", Paths.VDBFiles, "NewVDB", "");
-				}
+				//if(GUILayout.Button("Browse", GUILayout.Width(100)))
+				//{
+				//	_toVDB = EditorUtility.SaveFilePanel("Choose a place to save the Voxel Database file", Paths.VDBFiles, "NewVDB", "");
+				//}
 			}
 			GUILayout.EndHorizontal();
 
@@ -189,6 +197,29 @@ namespace CubSub
 		
 		}
 
+		//this interesting little function should, in the event that we try to overwrite a vdb, allow us to find out if there
+		//is a ColoredCubesVolumeData .asset which might have the vdb currently checked out.
+		//we can then attempt to destroy the data in order to release the vdb for deletion. 
+
+		//notice this file will only return ONE representative. This code is not robust for situations in which two 
+		//ColoredCubesVolumeDatas are attempting to access the same vdb in read-only mode. 
+		public ColoredCubesVolumeData FindVolumeMatchingPath(String vdbPath)
+		{
+			Debug.Log ("Beginning search for ColoredCubesVolumeData which matches vdbPath.");
+			ColoredCubesVolumeData[] datas = Resources.FindObjectsOfTypeAll(typeof(ColoredCubesVolumeData)) as ColoredCubesVolumeData[];
+			foreach(ColoredCubesVolumeData data in datas)
+			{
+				Debug.Log ("Comparing the strings from Data: "  + data.fullPathToVoxelDatabase + " && VDBPath: " + vdbPath);
+				if(String.Compare (data.fullPathToVoxelDatabase, vdbPath) == 0)
+				{
+					Debug.Log ("Match found");
+					return data;
+				}
+			}
+			Debug.Log ("Match not found");
+			return null;
+		}
+
 		//This is the function that will be called when the big 'convert' button is pressed on the panel. 
 		public void ConvertMap()
 		{
@@ -211,10 +242,12 @@ namespace CubSub
 			//we'll pop em in an array for now so that it's easier to save them
 			ColoredCubesVolumeData[] newAssets = new ColoredCubesVolumeData[regionCount];
 
+			//debugging to make sure loops work and understand if any assets went mysteriously missing.
 			Debug.Log ("newAssets.Length = " + newAssets.Length.ToString());
 
-			//this exists ENTIRELY so that I can concatenate strings together and perform sexy operations on them :|
-			String pathHelp = "";
+			//this exists ENTIRELY as a set of helpers so that I can concatenate strings together and perform sexy operations on them :|
+			String pathVDB = "";
+			String pathAsset = "";
 	
 			// ----CONVERSION OF REGIONS-----!//
 			// I have added a wiki page on the evils of conversion. Right now, I am creating a VoxelData object per region
@@ -222,6 +255,9 @@ namespace CubSub
 			regionCount = 0;
 			foreach(AnvilRegion region in leRegions)
 			{
+				//well, since I put it in the above foreach, I suddenly feel obligated to do it here, also... Don't judge me!
+				if(region == null) continue;
+
 				//Chunk Size * chunks in region.... map is automatically 256 deep
 				int xSize = region.XDim * this.subChunkSize;
 				int zSize = region.ZDim * this.subChunkSize;
@@ -237,20 +273,49 @@ namespace CubSub
 
 				//use that nice helper variable with this nice helper function to ensure our path is prepped for either single or multiple saves...
 				//all without cluttering our code with loads of if/thens
-				pathHelp = Paths.HelpMakePath(_toVDB, newAssets.Length, regionCount, ".vdb");
+				pathVDB = Paths.HelpMakePath(_toVDB, newAssets.Length, regionCount, ".vdb");
+				//pathAsset = Paths.HelpMakePath(_toAsset, newAssets.Length, regionCount, ".asset");
 
-				//temporary test condition
-				if(File.Exists (pathHelp))
+				//Alrighty then. What we want to do is check and see if this VDB already exists.
+				//if it exists, we want to try and delete it.
+				//to delete it, we have to figure out if it's somehow locked and then attempt to unlock it.
+				//then we have to try and delete it and we might get some errors (for which we should prep a try/catch)
+				if(File.Exists (pathVDB))
 				{
 
-					File.Delete (pathHelp);
-					Debug.Log ("Attempted to save a VDB that already exists. Attempting to fail gracefully by aborting conversion attempt.");
-					return;
+					Debug.Log ("Found a VDB with the same name as "+ pathVDB + " and now attempting to handle things...");
 
+					//Alright, so we're going to do some hacking and see if we can figure out how to delete the vdbs live.
+					//this is gonna look for the .asset file that the vdb is attached to...
+					ColoredCubesVolumeData oldData = FindVolumeMatchingPath(pathVDB);
+
+					//if we managed to find the .asset that links to this vdb, 
+					if(oldData != null)
+					{
+						Debug.Log ("Found an old .asset attached to the VDB; attempting to shut it down.");
+
+						//I'm going out on a limb here to see if this works... If it doesn't, we can fudge around a little
+						//more or just try to fail gracefully.
+						oldData.ShutdownCubiquityVolume();
+
+						Debug.Log ("Attempting to delete .asset");
+
+						//now let's try and delete the asset itself so we get no linking errors...
+						AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(oldData));
+
+					}
+
+					Debug.Log ("Attempting to delete the old VDB");
+
+					//When this error is thrown, the entire conversion attempt stops; and we don't corrupt our existing data.
+					File.Delete (pathVDB);
+				
 				}
 
+				Debug.Log ("Creating new VDB");
+
 				//CREATE LE NEW DATA with the path we just got :)
-				data = VolumeData.CreateEmptyVolumeData<ColoredCubesVolumeData>(new Region(0, 0, 0, xSize-1, ySize-1, zSize-1), pathHelp);
+				data = VolumeData.CreateEmptyVolumeData<ColoredCubesVolumeData>(new Region(0, 0, 0, xSize-1, ySize-1, zSize-1), pathVDB);
 
 				//Mayday!
 				if(data == null)
@@ -335,8 +400,9 @@ namespace CubSub
 			//the region number if we loaded more than one region, and leave the name the way it is if we didn't.
 			//we just have to make the new asset(s) permenant
 
-			//so grab where we want to save the asset(s)
-			this._toAsset = EditorUtility.SaveFilePanel("Choose a place to save the Voxel Database", Paths.VoxelDatabases, "NewVoxelDatabase", "");
+			//DEPRECIATED - We are now just using a 'save name' and navigating ourselves
+			//so grab where we want to save the asset(s) 
+			//this._toAsset = EditorUtility.SaveFilePanel("Choose a place to save the Voxel Database", Paths.VoxelDatabases, "NewVoxelDatabase", "");
 
 			if (_toAsset.StartsWith(Application.dataPath)) {
 				_toAsset = "Assets" + _toAsset.Substring(Application.dataPath.Length);
@@ -350,13 +416,11 @@ namespace CubSub
 			for(regionCount = 0; regionCount < newAssets.Length; regionCount++)
 			{
 				//use the pathHelper to streamline things and unclutter our code again!
-				pathHelp = Paths.HelpMakePath(_toAsset, newAssets.Length, regionCount, ".asset");
+				pathAsset = Paths.HelpMakePath(_toAsset, newAssets.Length, regionCount, ".asset");
 
 				//Creat ethe asset
-				AssetDatabase.CreateAsset(newAssets[regionCount], pathHelp);
+				AssetDatabase.CreateAsset(newAssets[regionCount], pathAsset);
 
-				//Iteration code
-				regionCount++;
 			}
 
 			//Sellect the VoxelDatabase.asset we just created so we can drag/drop it to where we wish

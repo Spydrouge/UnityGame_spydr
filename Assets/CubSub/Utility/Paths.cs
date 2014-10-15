@@ -22,12 +22,20 @@ namespace CubSub
 
 		public static String VDBFiles
 		{
-			get { return VoxelDatabases + "/vdbs"; }
+			get { return VoxelDatabases + "/vdb"; }
 		}
 
 		public static String MAPFolders
 		{
 			get{return CubSub + "/SubstrateData";}
+		}
+
+		public static void PingDirectories()
+		{
+			Debug.Log ("CubSub: " + CubSub + " | " + Directory.Exists (CubSub));
+			Debug.Log ("VoxelDatabases: " + VoxelDatabases + " | " + Directory.Exists (VoxelDatabases));
+			Debug.Log ("VDBFiles: " + VDBFiles + " | " + Directory.Exists (VDBFiles));
+			Debug.Log ("MAPFolders: " + MAPFolders + " | " + Directory.Exists (MAPFolders));
 		}
 
 		//Okay here are our steps to homogenizing path input AND dealing with a situation where one file name
