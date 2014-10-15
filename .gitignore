@@ -10,6 +10,9 @@
 *.vdb.meta
 
 
+*.log
+
+
 
 # =============== #
 # Unity generated #
