@@ -335,7 +335,7 @@ namespace CubSub
 				Debug.Log ("Creating new VDB");
 
 				//CREATE LE NEW DATA with the path we just got :)
-				data = VolumeData.CreateEmptyVolumeData<ColoredCubesVolumeData>(new Region(0, 0, 0, xSize-1, ySize-1, zSize-1), pathVDB);
+				data = VolumeData.CreateEmptyVolumeData<ColoredCubesVolumeData>(new Region(0, 0, 0, xSize-1, ySize-1-_clipFromBelow, zSize-1), pathVDB);
 
 				//Mayday!
 				if(data == null)
