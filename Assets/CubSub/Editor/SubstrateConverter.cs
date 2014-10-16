@@ -257,7 +257,7 @@ namespace CubSub
 
 		//notice this function will only return ONE representative. This code is not singularly robust for situations in which two 
 		//ColoredCubesVolumeDatas are attempting to access the same vdb in read-only mode. 
-		public ColoredCubesVolumeData FindVolumeMatchingPath(String vdbPath, ColoredCubesVolumeData lastMatch)
+		public IEnumerable<ColoredCubesVolumeData> FindVolumeMatchingPath(String vdbPath)
 		{
 			//This Resources function allows us to nab all .assets, .prefabs, .etc not just stuff that's currently on the loaded scene.
 			//We want to get an array of all ColoredCubesVolumeData objects there are; any of them might have our vdb open
@@ -266,8 +266,6 @@ namespace CubSub
 			ColoredCubesVolumeData[] datas = Resources.FindObjectsOfTypeAll(typeof(ColoredCubesVolumeData)) as ColoredCubesVolumeData[];
 			foreach(ColoredCubesVolumeData data in datas)
 			{
-				//this should help prevent infinite while loops in the functions that rely on this
-				if(data == lastMatch) continue;
 
 				//We have the path to the vdb we want to destroy. The datas each keep paths to their vdbs. Everything is in absolute path
 				//form. Therefore we can use a straightforward string compare to see if any data has our vdb open
@@ -276,11 +274,11 @@ namespace CubSub
 				if(String.Compare (data.fullPathToVoxelDatabase, vdbPath) == 0)
 				{
 					//Debug.Log ("Match found");
-					return data;
+					yield return data;
 				}
 			}
 			//Debug.Log ("Match not found");
-			return null;
+			yield break;
 		}
 
 		//This is the function that will be called when the big 'convert' button is pressed on the panel. 
@@ -337,6 +335,7 @@ namespace CubSub
 
 				//anyway, make sure we create the new data with the proper file name!!!
 				ColoredCubesVolumeData data = null;
+				//ColoredCubesVolumeData oldData = null;
 
 				//use that nice helper variable with this nice helper function to ensure our path is prepped for either single or multiple saves...
 				//all without cluttering our code with loads of if/thens
@@ -354,15 +353,15 @@ namespace CubSub
 
 					//Alright, so we're going to do some hacking and see if we can figure out how to delete the vdbs live.
 					//this is gonna look for the .asset file that the vdb is attached to...
-					ColoredCubesVolumeData oldData = FindVolumeMatchingPath(pathVDB, null);
 
 					//if we managed to find the .asset that links to this vdb, we must BURN IT MUAHAHAHAHHAHAA
 					//I've changed if(oldData) to while(oldData) to account for the possibility that multiple Data .assets
 					//might have the vdb open in read only mode 
 
 					failDetector = 0;
-					while(oldData != null && failDetector < 1000)
+					foreach(ColoredCubesVolumeData oldData in FindVolumeMatchingPath(pathVDB))
 					{
+
 						Debug.Log ("Successfully found an .asset reading from the .vdb. Attempting to shut it down to release the .vdb.");
 
 						//I'm going out on a limb here to see if this works... If it doesn't, we can fudge around a little
@@ -374,10 +373,8 @@ namespace CubSub
 						//now let's try and delete the asset itself so we get no linking errors...
 						AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(oldData));
 
-						//check to make sure no one else had this vdb open (it could have been read only!)
-						oldData = FindVolumeMatchingPath(pathVDB, oldData);
-
 						failDetector++;
+						if(failDetector >= 1000) break;
 					}
 
 					//this should no longer ever fire because olddata does a comparison now; but I'll leave it in place. 
@@ -474,6 +471,8 @@ namespace CubSub
 				//Now, data should be filled with all of the cubes we extracted from the chunks. We need to save the .asset files! We want to add on
 				//the region number if we loaded more than one region, and leave the name the way it is if we didn't.
 				//we just have to make the new asset(s) permenant
+
+
 				
 				//Creat ethe asset
 				AssetDatabase.CreateAsset(data, pathAsset);
