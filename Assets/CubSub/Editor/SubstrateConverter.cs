@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using UnityEditor;
 using System;
@@ -291,27 +292,31 @@ namespace CubSub
 			AnvilRegionManager leRegions = leWorld.GetRegionManager();
 
 			//I have no idea what a more clever way of getting the number of regions in leRegions might be, so let's do this for now
-			int regionCount = 0;
+			int regionTotal = 0;
 			foreach(AnvilRegion region in leRegions)
 			{
 				if(region != null) //I hate that warning in the editor that region is declared but never used...
-					regionCount++;
+					regionTotal++;
 			}
 
-			//we'll pop em in an array for now so that it's easier to save them
-			ColoredCubesVolumeData[] newAssets = new ColoredCubesVolumeData[regionCount];
-
 			//debugging to make sure loops work and understand if any assets went mysteriously missing.
-			Debug.Log ("newAssets.Length = " + newAssets.Length.ToString());
+			Debug.Log ("Attempting to load " + regionTotal.ToString() + " regions");
 
 			//this exists ENTIRELY as a set of helpers so that I can concatenate strings together and perform sexy operations on them :|
 			String pathVDB = "";
 			String pathAsset = "";
+
+			//this has helped tremendously during the debug phase
+			int failDetector = 0;
+
+			//this needs to be rooted at the Assets directory, or there shall be chaos! CHAOS! 
+			//(If improperly done it will result in 'unable to create asset' and DEATH!
+			_toAsset = Paths.RootToDirectory(Application.dataPath, _toAsset);
 	
 			// ----CONVERSION OF REGIONS-----!//
 			// I have added a wiki page on the evils of conversion. Right now, I am creating a VoxelData object per region
 			//btw, we can use foreach on leRegions because leRegion is 'Enumerable'. Check out its inheritance. 
-			regionCount = 0;
+			int regionCount = 0;
 			foreach(AnvilRegion region in leRegions)
 			{
 				//well, since I put it in the above foreach, I suddenly feel obligated to do it here, also... Don't judge me!
@@ -332,8 +337,8 @@ namespace CubSub
 
 				//use that nice helper variable with this nice helper function to ensure our path is prepped for either single or multiple saves...
 				//all without cluttering our code with loads of if/thens
-				pathVDB = Paths.HelpMakePath(_toVDB, newAssets.Length, regionCount, ".vdb");
-				//pathAsset = Paths.HelpMakePath(_toAsset, newAssets.Length, regionCount, ".asset");
+				pathVDB = Paths.HelpMakePath(_toVDB, regionTotal, regionCount, ".vdb");
+				pathAsset = Paths.HelpMakePath(_toAsset, regionTotal, regionCount, ".asset");
 
 				//Alrighty then. What we want to do is check and see if this VDB already exists.
 				//if it exists, we want to try and delete it.
@@ -352,7 +357,8 @@ namespace CubSub
 					//I've changed if(oldData) to while(oldData) to account for the possibility that multiple Data .assets
 					//might have the vdb open in read only mode 
 
-					while(oldData != null)
+					failDetector = 0;
+					while(oldData != null && failDetector < 1000)
 					{
 						Debug.Log ("Successfully found an .asset reading from the .vdb. Attempting to shut it down to release the .vdb.");
 
@@ -368,6 +374,13 @@ namespace CubSub
 						//check to make sure no one else had this vdb open (it could have been read only!)
 						oldData = FindVolumeMatchingPath(pathVDB);
 
+						failDetector++;
+					}
+
+					if(failDetector >= 1000)
+					{
+						throw new System.ArgumentException("I need to write better while loops", failDetector.ToString());
+				
 					}
 
 					Debug.Log ("Attempting to delete the old .vdb under the assumption it is no longer open. If the deletion fails, the conversion will not proceed. The .vdb can be deleted manually with the Unity Editor closed, or you can specify a different save name for the .vdb.");
@@ -375,7 +388,7 @@ namespace CubSub
 					//When this error is thrown, the entire conversion attempt stops; and we don't corrupt our existing data.
 					File.Delete (pathVDB);
 				
-				}
+				} //checking for if VDB exists and deleting it/its .assets
 
 				Debug.Log ("Creating new VDB");
 
@@ -454,44 +467,23 @@ namespace CubSub
 					}
 				} //I/X loop
 
-				//and now pop em into the array and iterate
-				newAssets[regionCount] = data;
-				regionCount++;
+				//Now, data should be filled with all of the cubes we extracted from the chunks. We need to save the .asset files! We want to add on
+				//the region number if we loaded more than one region, and leave the name the way it is if we didn't.
+				//we just have to make the new asset(s) permenant
 				
+				//Creat ethe asset
+				AssetDatabase.CreateAsset(data, pathAsset);
+
+				//Do some selection/refreshing/cleanup
+				AssetDatabase.SaveAssets();
+				//EditorUtility.FocusProjectWindow ();
+				//Selection.activeObject = data;
+
+				//iterate :3
+				regionCount++;
 
 			}//for each region
 
-			//Now, data should be filled with all of the cubes we extracted from the chunks. We need to save the .asset files! We want to add on
-			//the region number if we loaded more than one region, and leave the name the way it is if we didn't.
-			//we just have to make the new asset(s) permenant
-
-			//DEPRECIATED - We are now just using a 'save name' and navigating ourselves
-			//so grab where we want to save the asset(s) 
-			//this._toAsset = EditorUtility.SaveFilePanel("Choose a place to save the Voxel Database", Paths.VoxelDatabases, "NewVoxelDatabase", "");
-
-			if (_toAsset.StartsWith(Application.dataPath)) {
-				_toAsset = "Assets" + _toAsset.Substring(Application.dataPath.Length);
-			}
-			else {
-				throw new System.ArgumentException("SubstrateLoader was asked to save a VoxelDatabase outside the Asset Folder", "absolutePath");
-			}
-
-			//if we have more than one asset, we want to append an enumerator after the name (_1, _2, _3, etc)
-			regionCount = 0;
-			for(regionCount = 0; regionCount < newAssets.Length; regionCount++)
-			{
-				//use the pathHelper to streamline things and unclutter our code again!
-				pathAsset = Paths.HelpMakePath(_toAsset, newAssets.Length, regionCount, ".asset");
-
-				//Creat ethe asset
-				AssetDatabase.CreateAsset(newAssets[regionCount], pathAsset);
-
-			}
-
-			//Sellect the VoxelDatabase.asset we just created so we can drag/drop it to where we wish
-			//AssetDatabase.SaveAssets ();
-			EditorUtility.FocusProjectWindow ();
-			Selection.activeObject = newAssets[0];
 
 			Debug.Log ("Conversion attempt was successful");
 		}
@@ -499,3 +491,4 @@ namespace CubSub
 	
 	}
 }
+ 

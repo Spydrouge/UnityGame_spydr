@@ -77,5 +77,22 @@ namespace CubSub
 
 		}
 
+		//root ie Application.dataPath
+		public static String RootToDirectory(String root, String path)
+		{
+			if (path.StartsWith(root)) 
+			{
+				//so this may be crazy, but if path starts with root, then the last folder of root (ie:Assets) can
+				//be found by searching for the last index of / and adding 1. and that position will correspond to the
+				//same place in path, allowing us to get the rooted path.
+				return path.Substring(root.LastIndexOf("/") + 1);
+			}
+			else 
+			{
+				throw new System.ArgumentException("A path ought to have been rooted at " + root + " but was not.", path);
+				//return "";
+			}
+		}
+
 	}
 }
