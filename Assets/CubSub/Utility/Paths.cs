@@ -87,7 +87,12 @@ namespace CubSub
 				//same place in path, allowing us to get the rooted path.
 				return path.Substring(root.LastIndexOf("/") + 1);
 			}
-			else 
+			//checks to see if the path is *already* rooted
+			else if(path.StartsWith (root.Substring(root.LastIndexOf("/") + 1)))
+			{
+				return path;
+			}
+			else
 			{
 				throw new System.ArgumentException("A path ought to have been rooted at " + root + " but was not.", path);
 				//return "";

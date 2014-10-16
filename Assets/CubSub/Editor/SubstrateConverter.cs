@@ -281,6 +281,22 @@ namespace CubSub
 			yield break;
 		}
 
+		public IEnumerable<ColoredCubesVolume> FindObjectMatchingData(ColoredCubesVolumeData data)
+		{
+			//I am not yet convinced I should be using Resources.FindObjectsOfTypeAll; I seem to remember there used
+			//to be an in-scene-only variant. But for now we'll try this.
+			ColoredCubesVolume[] vols = Resources.FindObjectsOfTypeAll(typeof(ColoredCubesVolume)) as ColoredCubesVolume[];
+			foreach (ColoredCubesVolume vol in vols)
+			{
+				//hey, do these have the same data? XD
+				if(vol.data == data)
+					yield return vol;
+				
+			}
+			yield break;
+			
+		}
+
 		//This is the function that will be called when the big 'convert' button is pressed on the panel. 
 		public void ConvertMap()
 		{
@@ -312,7 +328,8 @@ namespace CubSub
 
 			//this needs to be rooted at the Assets directory, or there shall be chaos! CHAOS! 
 			//(If improperly done it will result in 'unable to create asset' and DEATH!
-			_toAsset = Paths.RootToDirectory(Application.dataPath, _toAsset);
+			//Debug.Log ("Rooting _toAsset: " + _toAsset);
+			String toAssetHelp = Paths.RootToDirectory(Application.dataPath, _toAsset);
 	
 			// ----CONVERSION OF REGIONS-----!//
 			// I have added a wiki page on the evils of conversion. Right now, I am creating a VoxelData object per region
@@ -335,12 +352,17 @@ namespace CubSub
 
 				//anyway, make sure we create the new data with the proper file name!!!
 				ColoredCubesVolumeData data = null;
-				//ColoredCubesVolumeData oldData = null;
+
+				//This handy-dandy notebook is going to record for us information we need to regenerate copies of the VolumeData .asset that used to link to the
+				//vdb previous to import AND it holds onto the original data structures so we can ask ColoredCubesVolume if their data == data we replaced. 
+				Dictionary<String, ColoredCubesVolumeData> relinker = new Dictionary<String, ColoredCubesVolumeData>();
 
 				//use that nice helper variable with this nice helper function to ensure our path is prepped for either single or multiple saves...
 				//all without cluttering our code with loads of if/thens
 				pathVDB = Paths.HelpMakePath(_toVDB, regionTotal, regionCount, ".vdb");
-				pathAsset = Paths.HelpMakePath(_toAsset, regionTotal, regionCount, ".asset");
+				pathAsset = Paths.HelpMakePath(toAssetHelp, regionTotal, regionCount, ".asset");
+
+				//Debug.Log ("Created pathAsset: " + pathAsset);
 
 				//Alrighty then. What we want to do is check and see if this VDB already exists.
 				//if it exists, we want to try and delete it.
@@ -368,10 +390,17 @@ namespace CubSub
 						//more or just try to fail gracefully.
 						oldData.ShutdownCubiquityVolume();
 
-						//Debug.Log ("Attempting to delete .asset");
+						//referencing this function (GetAssetPath) takes a million bajillion years.
+						String oldDataPath = AssetDatabase.GetAssetPath (oldData);
+
+						//write down in our handy-dandy notebook that this oldData once existed at some location
+						if(!relinker.ContainsKey (oldDataPath))
+						{
+							relinker.Add (oldDataPath, oldData);
+						}
 
 						//now let's try and delete the asset itself so we get no linking errors...
-						AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(oldData));
+						AssetDatabase.DeleteAsset(oldDataPath);
 
 						failDetector++;
 						if(failDetector >= 1000) break;
@@ -472,21 +501,73 @@ namespace CubSub
 				//the region number if we loaded more than one region, and leave the name the way it is if we didn't.
 				//we just have to make the new asset(s) permenant
 
+				//there is a possibility a nincompoop with good intentions somehow ended up with an .asset file that
+				//has the name we're replacing, but a .vdb that's named something else entirely.
+				//in this case we don't want to destroy that potentially valuable .vdb- but we've got to get rid of the 
+				//asset. And since the .vdb might be locked, we have to shut it down to prevent strange deletion difficulties.
 
-				
-				//Creat ethe asset
+				if(File.Exists (pathAsset))
+				{
+					//check out if this is a ColoredCubesVolumeData or not
+					ColoredCubesVolumeData oldData = AssetDatabase.LoadAssetAtPath(pathAsset, typeof(ColoredCubesVolumeData)) as ColoredCubesVolumeData;
+					
+					if(oldData != null)
+					{
+						Debug.Log ("A stray .asset file has been found with an identical name but with a .vdb at " + oldData.fullPathToVoxelDatabase + " Will attempt to shutdown and overwrite the .asset without harming the .vdb");
+						
+						//again, this little bugger is going to help me refresh all the ColoredCubesVolumes at the end
+						//replacer.Add (pathVDB, oldData);
+						
+						//I'm going out on a limb here to see if this works... If it doesn't, we can fudge around a little
+						//more or just try to fail gracefully.
+						oldData.ShutdownCubiquityVolume();
+
+						//I am on the fence about whether I want to relink this data. And I don't think I do. After all, our previous foreach iterator 
+						//would have found this current oldData if there wasn't a mixmatch with vdbs. 
+					}
+					else
+					{
+						Debug.Log("An .asset of a different type (non ColoredCubesVolumeData) has been found at the save location. Attempting to overwrite it.");
+					}
+					
+					
+					//now let's try and delete the asset itself so we get no linking errors...
+					AssetDatabase.DeleteAsset(pathAsset);
+				}
+
+
+				//Debug.Log ("The hell is pathAsset? " + pathAsset);
+
+				//Create the asset
 				AssetDatabase.CreateAsset(data, pathAsset);
-
-				//Do some selection/refreshing/cleanup
 				AssetDatabase.SaveAssets();
-				//EditorUtility.FocusProjectWindow ();
-				//Selection.activeObject = data;
 
+				//Do some selection/saving/cleanup
+				EditorUtility.FocusProjectWindow ();
+				Selection.activeObject = data;
+
+				//This nifty little loop is going to handle refreshing our ColoredCubesVolumes!
+				//right off the bat I'm not going to have it create .asset files; especially cause I haven't shared
+				
+				//so, let's iterate through all of the oldDatas we destroyed
+				foreach(KeyValuePair<String, ColoredCubesVolumeData> toDo in relinker)
+				{
+
+					foreach(ColoredCubesVolume toLink in FindObjectMatchingData(toDo.Value))
+					{
+						//update it
+						toLink.data = data;
+
+					}
+				}
+				AssetDatabase.SaveAssets();
+			
 				//iterate :3
 				regionCount++;
 
 			}//for each region
 
+			AssetDatabase.Refresh ();
 
 			Debug.Log ("Conversion attempt was successful");
 		}
