@@ -3,3 +3,17 @@
 ********************************************************************************
 [17:06:31, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database.vdb'
 [17:06:31, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:15:20, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database.vdb'
+[17:15:20, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:18:12, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_1.vdb'
+[17:18:12, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:18:15, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_0.vdb'
+[17:18:15, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:18:29, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_0.vdb'
+[17:18:30, Info   ]: Creating empty voxel database as 'D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New Voxel Database_1.vdb'
+[17:18:30, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:18:37, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+********************************************************************************
+*                             Shutting down Cubiquity                          *
+********************************************************************************
+
