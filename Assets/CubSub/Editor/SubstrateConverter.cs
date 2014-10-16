@@ -297,9 +297,32 @@ namespace CubSub
 			
 		}
 
-		//This is the function that will be called when the big 'convert' button is pressed on the panel. 
+		//------------------------------------------------------------
+		//          GIGANTIC MAP CONVERSION FUNCTION!
+		//------------------------------------------------------------
+		
+		
+		/*		This is the function that will be called when the big 'convert' button is pressed on the panel. 
+		 *     	Conversion is BIG. I have divided it into the following stages:
+         *
+		 * 
+		 * 		1) Open the Substrate directory, read it, and initialize cubiquity stuff
+		 * 
+		 * 		2) Handle file names. Handle closing existing files, deleting them, replacing them, relinking them, etc. Make sure everything lines up smoothly,  and
+		 * 			minimize crashing as a result of overwriting things.
+		 * 		  
+		 * 		3) Translate the 3D Array of Voxels from Substrate to Cubiquity, minding things like Regions and dimensions.
+		 * 
+		 * 		4) Save all the materials we created and wish to keep. Again, ensure no naming conflict problems. 
+		 * 
+		 * 		5) Refresh everything dependent on the newly saved materials
+		*/
+
 		public void ConvertMap()
 		{
+			//------------------------------------------------------------
+			//------- STAGE 1: GET THE MAPS OPEN AND CREATE SOME HANDLERS!
+			//------------------------------------------------------------
 
 			//Load in the Substrate Map folder! (The three versions of map are 'Alpha, Beta, and Anvil.' Our 
 			//maps are served in Anvil format. We don't have to errorcheck; substrate will pop an error if we failed.
@@ -331,7 +354,9 @@ namespace CubSub
 			//Debug.Log ("Rooting _toAsset: " + _toAsset);
 			String toAssetHelp = Paths.RootToDirectory(Application.dataPath, _toAsset);
 	
-			// ----CONVERSION OF REGIONS-----!//
+			//------------------------------------------------------------
+			//------- PROCEED REGION BY REGION!
+			//------------------------------------------------------------
 			// I have added a wiki page on the evils of conversion. Right now, I am creating a VoxelData object per region
 			//btw, we can use foreach on leRegions because leRegion is 'Enumerable'. Check out its inheritance. 
 			int regionCount = 0;
@@ -352,6 +377,10 @@ namespace CubSub
 
 				//anyway, make sure we create the new data with the proper file name!!!
 				ColoredCubesVolumeData data = null;
+
+				//------------------------------------------------------------
+				//------- STAGE 2: HANDLE NAMING CONFLICTS/REIMPORTING/ETC
+				//------------------------------------------------------------
 
 				//This handy-dandy notebook is going to record for us information we need to regenerate copies of the VolumeData .asset that used to link to the
 				//vdb previous to import AND it holds onto the original data structures so we can ask ColoredCubesVolume if their data == data we replaced. 
@@ -433,6 +462,11 @@ namespace CubSub
 					return;
 				}
 
+
+				//------------------------------------------------------------
+				//------- STAGE 3: TRANSFER THE 3D ARRAYS, BLOCK BY BLOCK
+				//------------------------------------------------------------
+
 				//declare the chunk-reference-thingy we'll be using to access Substrate blocks!
 				ChunkRef chunk = null;
 				AlphaBlockCollection blocks = null; //I get the impression Substrate once thought it needed Alpha, Beta, and Anvil Block Collections... and then ended up only needing 1 kind...
@@ -497,6 +531,11 @@ namespace CubSub
 					}
 				} //I/X loop
 
+
+				//------------------------------------------------------------
+				//------- STAGE 4: SAVE EVERYTHING WHERE IT NEEDS TO GO, AGAIN PREVENT NAMING CONFLICTS
+				//------------------------------------------------------------
+
 				//Now, data should be filled with all of the cubes we extracted from the chunks. We need to save the .asset files! We want to add on
 				//the region number if we loaded more than one region, and leave the name the way it is if we didn't.
 				//we just have to make the new asset(s) permenant
@@ -546,6 +585,10 @@ namespace CubSub
 				EditorUtility.FocusProjectWindow ();
 				Selection.activeObject = data;
 
+				//------------------------------------------------------------
+				//------- STAGE 5: REFRESH DEPENDENT COMPONENTS
+				//------------------------------------------------------------
+
 				//This nifty little loop is going to handle refreshing our ColoredCubesVolumes!
 				//right off the bat I'm not going to have it create .asset files; especially cause I haven't shared
 				
@@ -560,6 +603,7 @@ namespace CubSub
 
 					}
 				}
+
 				AssetDatabase.SaveAssets();
 			
 				//iterate :3
