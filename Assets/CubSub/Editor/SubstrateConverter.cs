@@ -257,7 +257,7 @@ namespace CubSub
 
 		//notice this function will only return ONE representative. This code is not singularly robust for situations in which two 
 		//ColoredCubesVolumeDatas are attempting to access the same vdb in read-only mode. 
-		public ColoredCubesVolumeData FindVolumeMatchingPath(String vdbPath)
+		public ColoredCubesVolumeData FindVolumeMatchingPath(String vdbPath, ColoredCubesVolumeData lastMatch)
 		{
 			//This Resources function allows us to nab all .assets, .prefabs, .etc not just stuff that's currently on the loaded scene.
 			//We want to get an array of all ColoredCubesVolumeData objects there are; any of them might have our vdb open
@@ -266,6 +266,9 @@ namespace CubSub
 			ColoredCubesVolumeData[] datas = Resources.FindObjectsOfTypeAll(typeof(ColoredCubesVolumeData)) as ColoredCubesVolumeData[];
 			foreach(ColoredCubesVolumeData data in datas)
 			{
+				//this should help prevent infinite while loops in the functions that rely on this
+				if(data == lastMatch) continue;
+
 				//We have the path to the vdb we want to destroy. The datas each keep paths to their vdbs. Everything is in absolute path
 				//form. Therefore we can use a straightforward string compare to see if any data has our vdb open
 
@@ -351,7 +354,7 @@ namespace CubSub
 
 					//Alright, so we're going to do some hacking and see if we can figure out how to delete the vdbs live.
 					//this is gonna look for the .asset file that the vdb is attached to...
-					ColoredCubesVolumeData oldData = FindVolumeMatchingPath(pathVDB);
+					ColoredCubesVolumeData oldData = FindVolumeMatchingPath(pathVDB, null);
 
 					//if we managed to find the .asset that links to this vdb, we must BURN IT MUAHAHAHAHHAHAA
 					//I've changed if(oldData) to while(oldData) to account for the possibility that multiple Data .assets
@@ -372,11 +375,12 @@ namespace CubSub
 						AssetDatabase.DeleteAsset(AssetDatabase.GetAssetPath(oldData));
 
 						//check to make sure no one else had this vdb open (it could have been read only!)
-						oldData = FindVolumeMatchingPath(pathVDB);
+						oldData = FindVolumeMatchingPath(pathVDB, oldData);
 
 						failDetector++;
 					}
 
+					//this should no longer ever fire because olddata does a comparison now; but I'll leave it in place. 
 					if(failDetector >= 1000)
 					{
 						throw new System.ArgumentException("I need to write better while loops", failDetector.ToString());
