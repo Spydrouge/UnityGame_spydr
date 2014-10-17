@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Name: New Voxel Database_1
   m_EditorClassIdentifier: 
   basePath: 2
-  relativePathToVoxelDatabase: D:/Users/Melissa/GIT/CubSub_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New
+  relativePathToVoxelDatabase: D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/New
     Voxel Database_1.vdb
   mWritePermissions: 1

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEditor;
 
 using System;
 using System.IO;
@@ -8,6 +9,7 @@ using Cubiquity;
 using Cubiquity.Impl;
 
 
+
 namespace CogBlock
 {
 	/// <summary>
@@ -15,7 +17,7 @@ namespace CogBlock
 	/// additional functionality. It may eventually be subsumed by a similar class written by Lake.
 	/// </summary>
 	[ExecuteInEditMode]
-	public class CogBlockVolume: ColoredCubesVolume
+	public class CogBlockVolume: Volume
 	{
 		//we do not currently HAVE CogBlockVolumeData
 
@@ -53,10 +55,83 @@ namespace CogBlock
 			newObject.AddComponent<CogBlockVolume>().data = data;
 
 			//Add the other important components
-			newObject.AddComponent<CogBlockVolumeRenderer>(); 
+			CogBlockVolumeRenderer volRend = newObject.AddComponent<CogBlockVolumeRenderer>(); 
 			newObject.AddComponent<CogBlockVolumeCollider>(); 
 
+			//initialize the volume renderer so that it's normals face in the correct direction
+			if(volRend != null) //I miss actionscript with lazy evaluation so I could string these all together in one big if..
+			{
+				if(volRend.material != null)
+				{		
+					// We compute surface normals using derivative operations in the fragment shader, but for some reason
+					// these are backwards on Linux. We can correct for this in the shader by setting the multiplier below.
+					#if UNITY_STANDALONE_LINUX && !UNITY_EDITOR
+					float normalMultiplier = -1.0f;
+					#else
+					float normalMultiplier = 1.0f;
+					#endif					
+					volRend.material.SetFloat("normalMultiplier", normalMultiplier);
+				}
+			}
+
 			return newObject;
+		}
+
+		/// <summary>
+		/// Cubiquity itself lamented a lack of the ability to select objects based on raycasting. In light of that, I'm going to attempt getting this function to work.
+		/// </summary>
+		void Update()
+		{
+			if (Input.GetMouseButtonDown(0))
+			{
+				RaycastHit hitInfo = new RaycastHit();
+				if (this == hitInfo.transform.gameObject)
+				{
+					Selection.activeObject = this;
+					Debug.Log ("RaycastingSelect");
+				}
+			}
+		}
+
+		/// <summary>
+		/// Synchronize this instance.
+		/// </summary>
+		protected override void Synchronize()
+		{			
+			//super!
+			base.Synchronize();
+						
+			// Check to make sure we have anything to Synchronize
+			if(data == null)
+			{
+				return;
+			}
+		
+			//still checking
+			if(!data.volumeHandle.HasValue)
+			{
+				return;
+			}
+
+			//update the volume
+			CubiquityDLL.UpdateVolume(data.volumeHandle.Value);
+
+			//try to synchronize the octrees
+			if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
+			{		
+				uint rootNodeHandle = CubiquityDLL.GetRootOctreeNode(data.volumeHandle.Value);
+				
+				if(rootOctreeNodeGameObject == null)
+				{
+					rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
+				}
+				
+				OctreeNode rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNode>();
+				int nodeSyncsPerformed = rootOctreeNode.syncNode(maxNodesPerSync, gameObject);
+				
+				// Set flat for us/editor-user.
+				isMeshSyncronized = (nodeSyncsPerformed == 0);
+			}
 		}
 	}
 

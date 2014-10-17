@@ -11,7 +11,8 @@ using Cubiquity.Impl;
 namespace CogBlock
 {
 	/// <summary>
-	/// I am nervous that this cannot inherit from ColoredCubes, and wary of errors it may cause. 
+	/// I am nervous that this cannot inherit from ColoredCubes, and wary of errors it may cause. I have copied this entire class
+	/// from ColoredCubesVolumeData. I shall do likewise with the other classes and then attempt to get them to run.
 	/// </summary>
 	[System.Serializable]
 	public sealed class CogBlockVolumeData : VolumeData

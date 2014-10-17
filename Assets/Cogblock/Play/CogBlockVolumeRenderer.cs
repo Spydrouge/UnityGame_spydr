@@ -15,7 +15,15 @@ namespace CogBlock
 	/// Placeholder
 	/// </summary>
 	[ExecuteInEditMode]
-	public class CogBlockVolumeRenderer: ColoredCubesVolumeRenderer
+	public class CogBlockVolumeRenderer: VolumeRenderer
 	{
+		void Awake()
+		{
+			if(material == null)
+			{
+				// This shader should be appropriate in most scenarios, and makes a good default.
+				material = Instantiate(Resources.Load("Materials/ColoredCubes", typeof(Material))) as Material;
+			}
+		}
 	}
 }
