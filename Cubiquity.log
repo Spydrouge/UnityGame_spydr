@@ -41,3 +41,7 @@
 [16:38:12, Error  ]: Encountered 'unable to open database file' (error code 14) when executing 'sqlite3_open_v2(pathToExistingVoxelDatabase.c_str(), &(voxelDatabase->mDatabase), flags, NULL)'
 [16:38:12, Error  ]: Caught 'SQLiteError' at C interface. Message reads: "Encountered 'unable to open database file' (error code 14) when executing 'sqlite3_open_v2(pathToExistingVoxelDatabase.c_str(), &(voxelDatabase->mDatabase), flags, NULL)'"
 [16:39:34, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/7CB6A4E7.vdb'
+********************************************************************************
+*                             Shutting down Cubiquity                          *
+********************************************************************************
+
