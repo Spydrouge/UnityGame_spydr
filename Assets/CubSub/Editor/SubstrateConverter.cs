@@ -21,32 +21,51 @@ using Cubiquity.Impl;
 
 namespace CubSub
 {	
+
 	//By Deriving from EditorWindow, I have created an independent piece of software accessible at edit time that does not have to be attached to a gameobject, like ColoredCubeVolume
 	//It will be its own panel, and hopefully more useful as a result. 
+	/// <summary>
+	/// Creates an editor window with which we can convert Substrate Map directories (which contain a region folder and an unknown number of regions) into Cubiquity Colored Cubes Volumes.
+	/// </summary>
 	public class SubstrateConverter : EditorWindow
 	{
 
-		//Let's store this info!
+		/// <summary>
+		///  The location of a directory which represents a Substrate Map. This variable reads from the Editor window and can change at any time.
+		/// </summary>
 		protected String _toSubstrateMap = "";
 
+		/// <summary>
+		/// The name under which to save new .vdb and .asset files for Cubiquity. This variable reads from the Editor window and can change at any time.
+		/// </summary>
 		protected string _saveName = "New Voxel Database";
-		protected String _toVDB = Paths.VDBFiles +"/New Voxel Database";
-		protected String _toAsset = Paths.VoxelDatabases +"/New Voxel Database";
+		protected String toVDB = Paths.VDBFiles +"/New Voxel Database";
+		protected String toAsset = Paths.VoxelDatabases +"/New Voxel Database";
 
-		//any additional optioins we want to add
+		/// <summary>
+		/// Opens a drawer of additional parameters for our import/export use.
+		/// </summary>
 		protected bool _options = false;
 
+		/// <summary>
+		/// Will remove this number of blocks from the bottom of a chunk. This variable reads from the Editor window and can change at any time.
+		/// </summary>
 		protected int _clipFromBelow = 60;
-		protected const int _defaultClipFromBelow = 60;
+		protected const int defaultClipFromBelow = 60;
 
+		/// <summary>
+		/// Will remove this number of blocks from the top of a chunk. This variable reads from the Editor window and can change at any time.
+		/// </summary>
 		protected int _clipFromAbove = 150;
-		protected const int _defaultClipFromAbove = 150;
+		protected const int defaultClipFromAbove = 150;
 
 		//hard code in some stuff we know about substrate, to keep track of it. 
 		protected int subChunkSize = 16;
 		protected int subMapDepth = 256;
 
-		//dictonary mapping substrate values to quantized colors for Cubiquity
+		/// <summary>
+		/// Mapping substrate values to quantized colors for Cubiquity, currently using the neat HexColor.QuantHex() function;
+		/// </summary>
 		protected Dictionary<int, QuantizedColor> subToCubDict = new Dictionary<int, QuantizedColor>()
 		{ 	{0, HexColor.QuantHex("00000000")},  //This should be an empty block. I watched as it was used in the 'delete cube' function of Cubiquity (Quantized color(0,0,0,0))
 			{1, HexColor.QuantHex("636573FF")},  	//Stone
@@ -74,8 +93,10 @@ namespace CubSub
 			{90, HexColor.QuantHex("C795F0FF")},	//Portal
 		};
 
-		//This sexy code puts this EditorWindow into Unity's Menus (ya know, at the top of the program)
-		//And attached this 'Show Window' function to clicking the menu item
+	
+		/// <summary>
+		/// [MenuItem ("Window/OpenCog/Substrate Converter")] puts this EditorWindow into Unity's Menus under Window/OpenCog/Substrate Converter.'Show Window' is called when the menu item is clicked.
+		/// </summary>
 		[MenuItem ("Window/OpenCog/Substrate Converter")]
 		public static void ShowWindow()
 		{
@@ -89,7 +110,10 @@ namespace CubSub
 			Paths.PingDirectories();
 		}
 		
-		//Dis is vhere de actual 'look' of the panel goes. OnGUI() is called like an Update() 
+
+		/// <summary>
+		/// Dis iz vhere de actual 'look' of the panel goes. OnGUI() is called like an Update() of sorts.
+		/// </summary>
 		public void OnGUI()
 		{
 			//change the little folder topper that displays the title of the Editor Window
@@ -126,8 +150,8 @@ namespace CubSub
 			GUILayout.BeginHorizontal();
 			{
 				_saveName = EditorGUILayout.TextField("Name to Save As", _saveName);
-				_toVDB = Paths.VDBFiles + "/" +_saveName;
-				_toAsset = Paths.VoxelDatabases + "/" + _saveName;
+				toVDB = Paths.VDBFiles + "/" +_saveName;
+				toAsset = Paths.VoxelDatabases + "/" + _saveName;
 
 				//if(GUILayout.Button("Browse", GUILayout.Width(100)))
 				//{
@@ -175,8 +199,8 @@ namespace CubSub
 						//create an option to quickly reset to default (recommended, and OpenCog/Substrate specific) dimensions. 
 						if(GUILayout.Button("Defaults", GUILayout.Width(100))) 
 						{
-							_clipFromBelow = _defaultClipFromBelow;
-							_clipFromAbove = _defaultClipFromAbove;
+							_clipFromBelow = defaultClipFromBelow;
+							_clipFromAbove = defaultClipFromAbove;
 						}
 					}
 					GUILayout.EndHorizontal();
@@ -219,8 +243,13 @@ namespace CubSub
 			}
 		}
 
-		//Simple function for checking out our subtoCub dictionary for block type swapping. 
-		//contains a little logic for handling the situation if a match isn't found.
+		/// <summary>
+		/// Simple function for checking out our dictionary for Substrate-to-Cubiquity Block ID conversions. Will attempt to add a new dictionary key if a block of unknown type is found.
+		/// </summary>
+		/// <returns>
+		/// A Cubiquity Block ID (While using colored cubes, the 'Block ID' is actually just the Quantized Color we'll be rendering).
+		/// </returns>
+		/// <param name="subBlockType">The Substrate Block ID we started with.</param>
 		public QuantizedColor ConvertBlock(int subBlockType)
 		{
 			//check and see if there's a match
@@ -242,21 +271,28 @@ namespace CubSub
 				//therefore preserving data of unexpected blocks with an alpha of 99 seemed clever ;)
 
 				//eh, fix/replaced/tune it later if that's what one wishes. 
-				subToCubDict.Add (subBlockType, new QuantizedColor((byte)255, (byte)255, (byte)subBlockType, (byte)255));
+				subToCubDict.Add (subBlockType, new QuantizedColor((byte)255, (byte)255, (byte)subBlockType, (byte)99));
 
 				Debug.Log("Unable to find block " + subBlockType.ToString () + ". Attempting to create dummy block in yellow.");
 
 				return subToCubDict[subBlockType];
 			}
+	
 		
 		}
 
-		//this interesting little function should, in the event that we try to overwrite a vdb, allow us to find out if there
-		//is a ColoredCubesVolumeData .asset which might have the vdb currently checked out.
-		//we can then attempt to close/destroy the data in order to release the vdb for deletion. 
+
 
 		//notice this function will only return ONE representative. This code is not singularly robust for situations in which two 
 		//ColoredCubesVolumeDatas are attempting to access the same vdb in read-only mode. 
+		/// <summary>
+		/// This interesting little function should, in the event that we try to overwrite a vdb, allow us to find out if there
+		/// is a ColoredCubesVolumeData .asset which might have the vdb currently checked out.
+		/// We can then attempt to close/destroy the data in order to release the vdb for deletion. 
+		/// As an IEnumerable which uses yield, it can and should be used with a foreach loop in ConvertMap.
+		/// </summary>
+		/// <returns> An .asset which is suspected to have the .vdb open.</returns>
+		/// <param name="vdbPath">An absolute path to the .vdb file.</param>
 		public IEnumerable<ColoredCubesVolumeData> FindVolumeMatchingPath(String vdbPath)
 		{
 			//This Resources function allows us to nab all .assets, .prefabs, .etc not just stuff that's currently on the loaded scene.
@@ -300,24 +336,24 @@ namespace CubSub
 		//------------------------------------------------------------
 		//          GIGANTIC MAP CONVERSION FUNCTION!
 		//------------------------------------------------------------
-		
-		
-		/*		This is the function that will be called when the big 'convert' button is pressed on the panel. 
-		 *     	Conversion is BIG. I have divided it into the following stages:
-         *
-		 * 
-		 * 		1) Open the Substrate directory, read it, and initialize cubiquity stuff
-		 * 
-		 * 		2) Handle file names. Handle closing existing files, deleting them, replacing them, relinking them, etc. Make sure everything lines up smoothly,  and
-		 * 			minimize crashing as a result of overwriting things.
-		 * 		  
-		 * 		3) Translate the 3D Array of Voxels from Substrate to Cubiquity, minding things like Regions and dimensions.
-		 * 
-		 * 		4) Save all the materials we created and wish to keep. Again, ensure no naming conflict problems. 
-		 * 
-		 * 		5) Refresh everything dependent on the newly saved materials
-		*/
-
+		///<summary>
+		///		<para>This is the function that will be called when the big 'convert' button is pressed on the panel. 
+		///     	Conversion is BIG. I have divided it into the following stages:</para>
+        /// 		<para></para>
+		/// 		<para>1) Open the Substrate directory, read it, and initialize cubiquity stuff </para>
+		/// 
+		/// 		<para>2) Handle file names. Handle closing existing files, deleting them, replacing them, relinking them, etc. Make sure everything lines up smoothly,  and
+		/// 			minimize crashing as a result of overwriting things.</para>
+		/// 		  
+		/// 		<para>3) Translate the 3D Array of Voxels from Substrate to Cubiquity, minding things like Regions and dimensions.</para>
+		/// 
+		/// 		<para>4) Save all the materials we created and wish to keep. Again, ensure no naming conflict problems. </para>
+		/// 
+		/// 		<para>5) Refresh everything dependent on the newly saved materials</para>
+		///			<para></para>
+		/// 		<para> Although this function takes no parameters, it is reliant heavily on class members; such as toAsset, toVdb, _options, _saveName,  _toSubstrateMap, and in general
+		/// 			pretty much every other part of SubstrateConverter. It also relies on Application., AssetDatabase., and File. calls.</para>
+		/// </summary>
 		public void ConvertMap()
 		{
 			//------------------------------------------------------------
@@ -352,7 +388,7 @@ namespace CubSub
 			//this needs to be rooted at the Assets directory, or there shall be chaos! CHAOS! 
 			//(If improperly done it will result in 'unable to create asset' and DEATH!
 			//Debug.Log ("Rooting _toAsset: " + _toAsset);
-			String toAssetHelp = Paths.RootToDirectory(Application.dataPath, _toAsset);
+			String toAssetHelp = Paths.RootToDirectory(Application.dataPath, toAsset);
 	
 			//------------------------------------------------------------
 			//------- PROCEED REGION BY REGION!
@@ -388,7 +424,7 @@ namespace CubSub
 
 				//use that nice helper variable with this nice helper function to ensure our path is prepped for either single or multiple saves...
 				//all without cluttering our code with loads of if/thens
-				pathVDB = Paths.HelpMakePath(_toVDB, regionTotal, regionCount, ".vdb");
+				pathVDB = Paths.HelpMakePath(toVDB, regionTotal, regionCount, ".vdb");
 				pathAsset = Paths.HelpMakePath(toAssetHelp, regionTotal, regionCount, ".asset");
 
 				//Debug.Log ("Created pathAsset: " + pathAsset);

@@ -6,30 +6,53 @@ using System.IO;
 
 namespace CubSub
 {
-	//Paths to File-Places of Awesome! Rawr, the Grammars!
+	/// <summary>
+	/// <para>Paths to File-Places of Awesome! With Sauce! Rawr, the Grammars!</para>
+	/// Translation: Editing this file allows an Editor-User to quickly alter where CubSub saves things.
+	/// It also contains helper functions for building paths.
+	/// </summary>
 	public class Paths
 	{
-		//Location of CubSub StreamingAssets
+
+		/// <summary>
+		/// Concatenates using Application.streamingAssetsPath + /CubSub where the CubSub Streaming Assets directory will be. This is typically used to create the other paths, such as VoxelDatabases.
+		/// </summary>
+		/// <value>An absolute path to the CubSub folder under Streaming Assets.</value>
 		public static String CubSub
 		{
 			get { return Application.streamingAssetsPath + "/CubSub"; }
 		}
 
+		/// <summary>
+		/// Determines where .asset files will be created during Substrate-to-Cubiquity conversion.
+		/// </summary>
+		/// <value>An absolute path to where the .asset files will initially be created. These .asset files can be moved to any place the Editor-User desires within the project hierarchy.</value>
 		public static String VoxelDatabases
 		{
 			get { return CubSub + "/VoxelDatabases"; }
 		}
-
+		/// <summary>
+		/// Determines where .vdb files will be created during Substrate-to-Cubiquity conversion.
+		/// </summary>
+		/// <value>An absolute path to where the .vdb files will be stored. These database files typically should not be moved after creation.</value>
 		public static String VDBFiles
 		{
 			get { return VoxelDatabases + "/vdb"; }
 		}
 
+		/// <summary>
+		/// This path supposes the project might have a dedicated parent directory for Substrate Map directores to be loaded from. It is the default location the editor will look in to find maps, but otherwise serves no purpose.
+		/// </summary>
+		/// <value>A string representing the absolute path to where we expect Substrate Map directories to be placed for import.</value>
 		public static String MAPFolders
 		{
 			get{return CubSub + "/SubstrateData";}
 		}
 
+		/// <summary>
+		/// This debug function pings the directories which Path is responsible for concatenating/supervising, and ensures that all of them exist.
+		/// Save and load errors might abound if some of these directories were to go missing.
+		/// </summary>
 		public static void PingDirectories()
 		{
 			Debug.Log ("Checking the existance of Paths,\n Click to see they all register as 'True'" +
@@ -39,14 +62,21 @@ namespace CubSub
 			"\nMAPFolders: " + MAPFolders + " : " + Directory.Exists (MAPFolders));
 		}
 
-		//Okay here are our steps to homogenizing path input AND dealing with a situation where one file name
-		//was given but we actually need to save multiple files:
-
-		//1. if there already is an extension, remove it.
-		//2. determine if we have to concatenate any numerals and an _
-		//3. re-add the extension (or add it to begin with if there never was one)
-		//4. return the result
-
+		///<summary>
+		///<para>This function was more useful back when users were inputting their own save directories for .vdbs and VoxelDatabase .assets (and should be used
+		///in the event a User-Editor would like to re-script such capabilities!) At present it is still used for
+		///homogenizing path input AND dealing with situations where only one file name was given but we actually need to save multiple files by:</para>
+		///<para></para>
+		///<para>1. if there already is an extension, remove it.</para>
+		///<para>2. determine if we have to concatenate any numerals and an _ based on whether we are saving an array of things</para>
+		///<para>3. re-add the extension (or add it to begin with if there never was one)</para>
+		///<para>4. return the result</para>
+		///</summary>
+		/// <returns>The homogenized and kosher path.</returns>
+		/// <param name="path">The path we've been given for saving at, which might have uncertain extensions or need numeric additions depending on how much of what we're saving.</param>
+		/// <param name="numToSave">The number of materials we'll be saving in a given set.</param>
+		/// <param name="numOn">The index of the material we're saving in a given set.</param>
+		/// <param name="extension">The extension the path needs to conclude with.</param>
 		public static String HelpMakePath(String path, int numToSave, int numOn, string extension)
 		{
 			//first of all, we have to be wary of unexpected dots showing up earlier. It's unlikey, yeah, but 
@@ -77,7 +107,14 @@ namespace CubSub
 
 		}
 
-		//root ie Application.dataPath
+		/// <summary>
+		/// <para>Attempts to make an absolute file path relative by rooting it at the chosen parent directory. Handles situations in which the path is already rooted. Will throw an exception if the chosen root does not show up in the file path's parent directories. </para>
+		/// <para></para>
+		/// <para>Note: As of yet will *not* be able to handle an improperly rooted relative path. Ie: if the file path is 'Assets/Bob/file.txt' and the root is 'D:/.../Assets/' it will work. But if the root is 'd:/.../Assets/Bob/, though the root and file path obviously overlap, it will nevertheless throw an exception. </para>
+		/// </summary>
+		/// <returns>A relativ</returns>
+		/// <param name="root">The 'root' at which we want to anchor the path. Ie: Application.DataPath</param>
+		/// <param name="path">An absolute path to a file or directory which we would like to root. This path *may* already be rooted, but it cannot be relative *and* unrooted.</param>
 		public static String RootToDirectory(String root, String path)
 		{
 			if (path.StartsWith(root)) 
