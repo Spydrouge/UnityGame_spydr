@@ -55,11 +55,53 @@ namespace CogBlock
 			String toVDB = EditorUtility.OpenFilePanel("Choose a Voxel Database (.vdb) file to load", CubSub.Paths.VDBFiles, "vdb");
 			String toAsset = CubSub.Paths.VoxelDatabases + "/New CogBlock Volume Data From File.asset";
 			
-			if(toVDB.Length != 0)
+			if(toVDB.Length == 0) return;
+
+			// Pass through to the other (deeper) version of the method.
+			VolumeData data = VolumeData.CreateFromVoxelDatabase<CogBlockVolumeData>(toVDB, VolumeData.WritePermissions.ReadWrite);
+
+			//to stop future errors and data corruption in the event a path cannot be opened. 
+			if(data == null) return;
+
+			if(File.Exists (toAsset))
 			{
-					// Pass through to the other version of the method.
-				VolumeDataAsset.CreateFromVoxelDatabase<CogBlockVolumeData>(CubSub.Paths.RootToDirectory(Application.streamingAssetsPath, toAsset));
+				//check out if this is a ColoredCubesVolumeData or not
+				CogBlockVolumeData oldData = AssetDatabase.LoadAssetAtPath(toAsset, typeof(CogBlockVolumeData)) as CogBlockVolumeData;
+				
+				if(oldData != null)
+				{
+					Debug.Log ("A stray .asset file has been found with an identical name but with a .vdb at " + oldData.fullPathToVoxelDatabase + " Will attempt to shutdown and overwrite the .asset without harming the .vdb");
+					
+					//again, this little bugger is going to help me refresh all the ColoredCubesVolumes at the end
+					//replacer.Add (pathVDB, oldData);
+					
+					//I'm going out on a limb here to see if this works... If it doesn't, we can fudge around a little
+					//more or just try to fail gracefully.
+					oldData.ShutdownCubiquityVolume();
+					
+					//I am on the fence about whether I want to relink this data. And I don't think I do. After all, our previous foreach iterator 
+					//would have found this current oldData if there wasn't a mixmatch with vdbs. 
+				}
+				else
+				{
+					Debug.Log("An .asset of a different type (non CogBlockVolumeData) has been found at the save location. Attempting to overwrite it.");
+				}
+				
+				
+				//now let's try and delete the asset itself so we get no linking errors...
+				AssetDatabase.DeleteAsset(toAsset);
 			}
+
+			String pathAsset = CubSub.Paths.RootToDirectory(Application.dataPath, toAsset);
+			Debug.Log ("Trying to save .asset at: " + pathAsset);
+			
+			//Create the asset
+			AssetDatabase.CreateAsset(data, pathAsset);
+			AssetDatabase.SaveAssets();
+			
+			//Do some selection/saving/cleanup
+			EditorUtility.FocusProjectWindow ();
+			Selection.activeObject = data;
 		}
 		
 		

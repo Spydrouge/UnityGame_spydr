@@ -15,7 +15,8 @@ namespace Cubiquity
 		public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
 		{
 			// At some point I should read this: http://forum.unity3d.com/threads/5687-C-plugin-pass-arrays-from-C
-				
+			Debug.Log("Trying to build ColoredCubes mesh from node");		
+		
 			// Create rendering and possible collision meshes.
 			Mesh collisionMesh = new Mesh();		
 			collisionMesh.hideFlags = HideFlags.DontSave;

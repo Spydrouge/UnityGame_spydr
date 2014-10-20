@@ -16,9 +16,11 @@ namespace CogBlock
 	[ExecuteInEditMode]
 	public class CogBlockVolumeCollider: VolumeCollider
 	{
+
+		//what the devil is a nodeHandle?
 		public override Mesh BuildMeshFromNodeHandle(uint nodeHandle)
 		{
-			// At some point I should read this: http://forum.unity3d.com/threads/5687-C-plugin-pass-arrays-from-C
+			Debug.Log("Trying to build ColoredCubes mesh from node");		
 			
 			// Create rendering and possible collision meshes.
 			Mesh collisionMesh = new Mesh();		
@@ -40,7 +42,9 @@ namespace CogBlock
 			//FIXME - set collision mesh bounds as we do with rendering mesh?
 			collisionMesh.vertices = vertices;
 			collisionMesh.triangles = indices;
-			
+
+			Debug.Log ("Collision Mesh Built from verticies of length: " + cubiquityVertices.Length.ToString());
+
 			return collisionMesh;
 		}
 	}

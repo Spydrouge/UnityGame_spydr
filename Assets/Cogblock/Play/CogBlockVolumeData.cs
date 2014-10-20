@@ -46,6 +46,53 @@ namespace CogBlock
 		 * \param z The 'z' position of the voxel to set.
 		 * \param quantizedColor The color the voxel should be set to.
 		 */
+
+		public String printData()
+		{
+			String toReturn = "";
+			QuantizedColor result = new QuantizedColor();
+
+			int lx = enclosingRegion.lowerCorner.x;
+			int ux = enclosingRegion.upperCorner.x;
+			int ly = enclosingRegion.lowerCorner.y;
+			int uy = enclosingRegion.upperCorner.y;
+			int lz = enclosingRegion.lowerCorner.z;
+			int uz = enclosingRegion.upperCorner.z;
+
+			Debug.Log("Dimensions on x: " + lx.ToString() + " to " + ux.ToString());
+			Debug.Log("Dimensions on z: " + lz.ToString() + " to " +uz.ToString());
+			Debug.Log("Dimensions on y: " + ly.ToString() + " to " + uy.ToString());
+			Debug.Log ("volume Handle: " + volumeHandle.Value.ToString ());
+
+
+			if(volumeHandle == null)
+			{
+				Debug.Log ("null volume handle");
+				return toReturn;
+			}
+
+			int i = 0;
+			//for(int i = lx; i < ux; i++)
+			//{
+
+				int j = 0;
+				//for(int j = lz; j < uz; j++)
+				//{
+					for(int k = ly; k < uy; k++)
+					{
+						CubiquityDLL.GetVoxel(volumeHandle.Value, i, k, j, out result);
+
+						Debug.Log (" " + i + "," + j + "," + k + ": " + result.red + "|" + result.green + "|" + result.blue + "|" + result.alpha);
+					}
+					//toReturn = toReturn + "|";
+				//}
+				//toReturn = toReturn + ";";
+			//}
+			    
+			   return toReturn;
+		}
+
+
 		public void SetVoxel(int x, int y, int z, QuantizedColor quantizedColor)
 		{
 			// The initialization can fail (bad filename, database locked, etc), so the volume handle could still be null.
