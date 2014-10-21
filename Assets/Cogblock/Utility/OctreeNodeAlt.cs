@@ -84,6 +84,12 @@ namespace CogBlock
 		//The purpose of availableNodeSyncs is because: This function is recursive. availableNodeSyncs tells it how deep to plumb
 		public int syncNode(int availableNodeSyncs, GameObject voxelTerrainGameObject)
 		{
+
+			//-------------------------------------------
+			//				PHASE ONE: Building Meshes!
+			//-------------------------------------------
+
+
 			//terminator of the all-powerful recursion
 			if(availableNodeSyncs <= 0) return 0;
 
@@ -102,13 +108,24 @@ namespace CogBlock
 						//Mesh renderingMesh = volumeRenderer.BuildMeshFromNodeHandle(nodeHandle);
 						
 						Mesh renderingMesh = null;
-						if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(TerrainVolume))
+
+						//-------------------------------------------
+						//				THE CODE OF EVIL!
+						//-------------------------------------------
+
+						Type volType = voxelTerrainGameObject.GetComponent<Volume>().GetType();
+
+						if(volType == typeof(TerrainVolume))
 						{
 							renderingMesh = BuildMeshFromNodeHandleForTerrainVolume(nodeHandle);
 						}
-						else if(voxelTerrainGameObject.GetComponent<Volume>().GetType() == typeof(ColoredCubesVolume))
+						else if(volType == typeof(ColoredCubesVolume))
 						{
 							renderingMesh = BuildMeshFromNodeHandleForColoredCubesVolume(nodeHandle);
+						}
+						else if(volType == typeof(CogBlockVolume))
+						{
+							renderingMesh = BuildMeshFromNodeHandleForCogBlockVolume(nodeHandle);
 						}
 						
 						MeshFilter meshFilter = gameObject.GetOrAddComponent<MeshFilter>() as MeshFilter;
@@ -164,6 +181,10 @@ namespace CogBlock
 				nodeSyncsPerformed++;
 				
 			}
+
+			//-------------------------------------------
+			//			PHASE TWO: Synchronize Renderer and Collider
+			//-------------------------------------------
 			
 			VolumeRenderer vr = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
 			MeshRenderer mr = gameObject.GetComponent<MeshRenderer>();
@@ -197,6 +218,11 @@ namespace CogBlock
 					lastSyncronisedWithVolumeCollider = Clock.timestamp;
 				}
 			}
+
+
+			//-------------------------------------------
+			//			PHASE THREE: RECURSE!
+			//-------------------------------------------
 			
 			//Now syncronise any children
 			for(uint z = 0; z < 2; z++)
@@ -329,6 +355,48 @@ namespace CogBlock
 			//renderingMesh.tangents = renderingTangents;
 			renderingMesh.uv = renderingUV;
 			renderingMesh.uv2 = renderingUV2;
+			renderingMesh.triangles = indices;
+			
+			// FIXME - Get proper bounds
+			renderingMesh.bounds.SetMinMax(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(32.0f, 32.0f, 32.0f));
+			
+			return renderingMesh;
+		}
+
+		public Mesh BuildMeshFromNodeHandleForCogBlockVolume(uint nodeHandle)
+		{
+
+			// At some point I should read this: http://forum.unity3d.com/threads/5687-C-plugin-pass-arrays-from-C
+			
+			Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f); // Required for the CubicVertex decoding process.
+			
+			// Create rendering and possible collision meshes.
+			Mesh renderingMesh = new Mesh();		
+			renderingMesh.hideFlags = HideFlags.DontSave;
+			
+			// Get the data from Cubiquity.
+			int[] indices = CubiquityDLL.GetIndices(nodeHandle);		
+			ColoredCubesVertex[] cubiquityVertices = CubiquityDLL.GetVertices(nodeHandle);			
+			
+			// Create the arrays which we'll copy the data to.
+			Vector3[] renderingVertices = new Vector3[cubiquityVertices.Length];	
+			Color32[] renderingColors = new Color32[cubiquityVertices.Length];
+			
+			for(int ct = 0; ct < cubiquityVertices.Length; ct++)
+			{
+				// Get the vertex data from Cubiquity.
+				Vector3 position = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
+				position -= offset; // Part of the CubicVertex decoding process.
+				QuantizedColor color = cubiquityVertices[ct].color;
+				
+				// Copy it to the arrays.
+				renderingVertices[ct] = position;
+				renderingColors[ct] = (Color32)color;
+			}
+			
+			// Assign vertex data to the meshes.
+			renderingMesh.vertices = renderingVertices; 
+			renderingMesh.colors32 = renderingColors;
 			renderingMesh.triangles = indices;
 			
 			// FIXME - Get proper bounds
