@@ -157,10 +157,10 @@ namespace CogBlock
 				
 				if(rootOctreeNodeGameObject == null)
 				{
-					rootOctreeNodeGameObject = OctreeNode.CreateOctreeNode(rootNodeHandle, gameObject);	
+					rootOctreeNodeGameObject = OctreeNodeAlt.CreateOctreeNode(rootNodeHandle, gameObject);	
 				}
 				
-				OctreeNode rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNode>();
+				OctreeNodeAlt rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNodeAlt>();
 				int nodeSyncsPerformed = rootOctreeNode.syncNode(maxNodesPerSync, gameObject);
 				
 				// Set flat for us/editor-user.
