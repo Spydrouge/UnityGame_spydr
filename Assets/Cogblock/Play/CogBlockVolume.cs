@@ -157,7 +157,7 @@ namespace CogBlock
 				
 				if(rootOctreeNodeGameObject == null)
 				{
-					rootOctreeNodeGameObject = OctreeNodeAlt.CreateOctreeNode(rootNodeHandle, gameObject);	
+					rootOctreeNodeGameObject = OctreeNodeAlt.CreateOctree(typeof(CogBlockOctreeNode), rootNodeHandle, gameObject);	
 				}
 				
 				OctreeNodeAlt rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNodeAlt>();

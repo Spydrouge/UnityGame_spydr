@@ -30,17 +30,38 @@ namespace CogBlock
 		[System.NonSerialized]
 		public uint nodeHandle;
 
-		//parents are == the volume itself, or any of its children octree nodes
-		public static GameObject CreateOctreeNode(uint nodeHandle, GameObject mother)
+		/// <summary>
+		/// Because Octrees are MonoBehaviors, they must be attached to game objects. This static function will deliver an octreeNode, properly attached
+		/// to a game object, of a given derivative type.
+		/// </summary>
+		/// <returns>A game object with an octree node attached.</returns>
+		/// <param name="octreeType">A type derived from the class OctreeNodeAlt, specific to the volume for which this OctreeNodeAlt is to be created.</param>
+		/// <param name="nodeHandle">The node handle to give the OctreeNodeAlt</param>
+		/// <param name="mother">The parent game object of the OctreeNodeAlt</param>
+		public static GameObject CreateOctree(Type octreeType, uint nodeHandle, GameObject mother)
 		{	
+			if(octreeType == null) 
+			{
+				Debug.LogWarning("OctreeNodeAlt->CreateOctreeNode was passed a null type. Attempting to fial gracefully by creating a non-functional OctreeNodeAlt.");
+				octreeType = typeof(OctreeNodeAlt);
+			}
+			if(!octreeType.IsSubclassOf(typeof(OctreeNodeAlt)))
+			{
+				Debug.LogWarning("OctreeNodeAlt->CreateOctreeNode was passed a type ("+volumeType+") that does not inherit from OctreeNodeAlt. Attempting to fail gracefully by creating a non-functional OctreeNodeAlt.");
+				octreeType = typeof(OctreeNodeAlt);
+			}
+
+			//All Octree nodes have positions. Let's get ours. 
 			int nx, ny, nz;
-			//Debug.Log("Getting position for node handle = " + nodeHandle);
 			CubiquityDLL.GetNodePosition(nodeHandle, out nx, out ny, out nz);
-			
+
+			//Since we're currently saving everything in a tree of game objects, we're going to name the game objects uniquely by using their positions.
 			StringBuilder name = new StringBuilder("(" + nx + ", " + ny + ", " + nz + ")");
-			
 			GameObject obj = new GameObject(name.ToString());
-			OctreeNodeAlt node = obj.AddComponent<OctreeNodeAlt>();
+
+
+			//
+			OctreeNodeAlt node = obj.AddComponent<octreeType.GetConstructors(System.Reflection.BindingFlags.Public)>();
 
 			node.lowerCorner = new Vector3(nx, ny, nz);
 			node.nodeHandle = nodeHandle;
@@ -92,7 +113,7 @@ namespace CogBlock
 
 			//terminator of the all-powerful recursion
 			if(availableNodeSyncs <= 0) return 0;
-
+			'
 			int nodeSyncsPerformed = 0;
 			
 			uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(nodeHandle);		
@@ -281,169 +302,5 @@ namespace CogBlock
 			children[x, y, z] = gameObject;
 		}
 		
-		public Mesh BuildMeshFromNodeHandleForTerrainVolume(uint nodeHandle)
-		{
-			// At some point I should read this: http://forum.unity3d.com/threads/5687-C-plugin-pass-arrays-from-C
-			
-			// Create rendering and possible collision meshes.
-			Mesh renderingMesh = new Mesh();		
-			renderingMesh.hideFlags = HideFlags.DontSave;
-			
-			// Get the data from Cubiquity.
-			int[] indices = CubiquityDLL.GetIndicesMC(nodeHandle);		
-			TerrainVertex[] cubiquityVertices = CubiquityDLL.GetVerticesMC(nodeHandle);			
-			
-			// Create the arrays which we'll copy the data to.
-			Vector3[] renderingVertices = new Vector3[cubiquityVertices.Length];		
-			Vector3[] renderingNormals = new Vector3[cubiquityVertices.Length];		
-			Color32[] renderingColors = new Color32[cubiquityVertices.Length];	
-			//Vector4[] renderingTangents = new Vector4[cubiquityVertices.Length];		
-			Vector2[] renderingUV = new Vector2[cubiquityVertices.Length];
-			Vector2[] renderingUV2 = new Vector2[cubiquityVertices.Length];
-			
-			for(int ct = 0; ct < cubiquityVertices.Length; ct++)
-			{
-				// Get and decode the position
-				Vector3 position = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
-				position *= (1.0f / 256.0f);
-				
-				// Get and decode the normal
-				
-				// Get the materials
-				Color32 color = new Color32(cubiquityVertices[ct].m0, cubiquityVertices[ct].m1, cubiquityVertices[ct].m2, cubiquityVertices[ct].m3);
-				//Vector4 tangents = new Vector4(cubiquityVertices[ct].m4 / 255.0f, cubiquityVertices[ct].m5 / 255.0f, cubiquityVertices[ct].m6 / 255.0f, cubiquityVertices[ct].m7 / 255.0f);
-				Vector2 uv = new Vector2(cubiquityVertices[ct].m4 / 255.0f, cubiquityVertices[ct].m5 / 255.0f);
-				Vector2 uv2 = new Vector2(cubiquityVertices[ct].m6 / 255.0f, cubiquityVertices[ct].m7 / 255.0f);
-				
-				ushort ux = (ushort)((cubiquityVertices[ct].normal >> (ushort)8) & (ushort)0xFF);
-				ushort uy = (ushort)((cubiquityVertices[ct].normal) & (ushort)0xFF);
-				
-				// Convert to floats in the range [-1.0f, +1.0f].
-				float ex = ux / 127.5f - 1.0f;
-				float ey = uy / 127.5f - 1.0f;
-				
-				// Reconstruct the origninal vector. This is a C++ implementation
-				// of Listing 2 of http://jcgt.org/published/0003/02/01/
-				float vx = ex;
-				float vy = ey;
-				float vz = 1.0f - Math.Abs(ex) - Math.Abs(ey);
-				
-				if (vz < 0.0f)
-				{
-					float refX = ((1.0f - Math.Abs(vy)) * (vx >= 0.0f ? +1.0f : -1.0f));
-					float refY = ((1.0f - Math.Abs(vx)) * (vy >= 0.0f ? +1.0f : -1.0f));
-					vx = refX;
-					vy = refY;
-				}
-				
-				Vector3 normal = new Vector3(vx, vy, vz);
-				normal.Normalize();
-				
-				// Copy it to the arrays.
-				renderingVertices[ct] = position;	
-				renderingNormals[ct] = normal;
-				renderingColors[ct] = color;
-				//renderingTangents[ct] = tangents;
-				renderingUV[ct] = uv;
-				renderingUV2[ct] = uv2;
-			}
-			
-			// Assign vertex data to the meshes.
-			renderingMesh.vertices = renderingVertices; 
-			renderingMesh.normals = renderingNormals;
-			renderingMesh.colors32 = renderingColors;
-			//renderingMesh.tangents = renderingTangents;
-			renderingMesh.uv = renderingUV;
-			renderingMesh.uv2 = renderingUV2;
-			renderingMesh.triangles = indices;
-			
-			// FIXME - Get proper bounds
-			renderingMesh.bounds.SetMinMax(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(32.0f, 32.0f, 32.0f));
-			
-			return renderingMesh;
-		}
-
-		public Mesh BuildMeshFromNodeHandleForCogBlockVolume(uint nodeHandle)
-		{
-
-			// At some point I should read this: http://forum.unity3d.com/threads/5687-C-plugin-pass-arrays-from-C
-			
-			Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f); // Required for the CubicVertex decoding process.
-			
-			// Create rendering and possible collision meshes.
-			Mesh renderingMesh = new Mesh();		
-			renderingMesh.hideFlags = HideFlags.DontSave;
-			
-			// Get the data from Cubiquity.
-			int[] indices = CubiquityDLL.GetIndices(nodeHandle);		
-			ColoredCubesVertex[] cubiquityVertices = CubiquityDLL.GetVertices(nodeHandle);			
-			
-			// Create the arrays which we'll copy the data to.
-			Vector3[] renderingVertices = new Vector3[cubiquityVertices.Length];	
-			Color32[] renderingColors = new Color32[cubiquityVertices.Length];
-			
-			for(int ct = 0; ct < cubiquityVertices.Length; ct++)
-			{
-				// Get the vertex data from Cubiquity.
-				Vector3 position = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
-				position -= offset; // Part of the CubicVertex decoding process.
-				QuantizedColor color = cubiquityVertices[ct].color;
-				
-				// Copy it to the arrays.
-				renderingVertices[ct] = position;
-				renderingColors[ct] = (Color32)color;
-			}
-			
-			// Assign vertex data to the meshes.
-			renderingMesh.vertices = renderingVertices; 
-			renderingMesh.colors32 = renderingColors;
-			renderingMesh.triangles = indices;
-			
-			// FIXME - Get proper bounds
-			renderingMesh.bounds.SetMinMax(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(32.0f, 32.0f, 32.0f));
-			
-			return renderingMesh;
-		}
-		
-		public Mesh BuildMeshFromNodeHandleForColoredCubesVolume(uint nodeHandle)
-		{
-			// At some point I should read this: http://forum.unity3d.com/threads/5687-C-plugin-pass-arrays-from-C
-			
-			Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f); // Required for the CubicVertex decoding process.
-			
-			// Create rendering and possible collision meshes.
-			Mesh renderingMesh = new Mesh();		
-			renderingMesh.hideFlags = HideFlags.DontSave;
-			
-			// Get the data from Cubiquity.
-			int[] indices = CubiquityDLL.GetIndices(nodeHandle);		
-			ColoredCubesVertex[] cubiquityVertices = CubiquityDLL.GetVertices(nodeHandle);			
-			
-			// Create the arrays which we'll copy the data to.
-			Vector3[] renderingVertices = new Vector3[cubiquityVertices.Length];	
-			Color32[] renderingColors = new Color32[cubiquityVertices.Length];
-			
-			for(int ct = 0; ct < cubiquityVertices.Length; ct++)
-			{
-				// Get the vertex data from Cubiquity.
-				Vector3 position = new Vector3(cubiquityVertices[ct].x, cubiquityVertices[ct].y, cubiquityVertices[ct].z);
-				position -= offset; // Part of the CubicVertex decoding process.
-				QuantizedColor color = cubiquityVertices[ct].color;
-				
-				// Copy it to the arrays.
-				renderingVertices[ct] = position;
-				renderingColors[ct] = (Color32)color;
-			}
-			
-			// Assign vertex data to the meshes.
-			renderingMesh.vertices = renderingVertices; 
-			renderingMesh.colors32 = renderingColors;
-			renderingMesh.triangles = indices;
-			
-			// FIXME - Get proper bounds
-			renderingMesh.bounds.SetMinMax(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(32.0f, 32.0f, 32.0f));
-			
-			return renderingMesh;
-		}
 	}
 }
