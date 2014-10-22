@@ -105,9 +105,6 @@ namespace CogBlock
 			gameObject.transform.localRotation = new Quaternion();
 			gameObject.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
 
-			//just in case
-			if(!lowerCorner) return;
-
 			//and set the name for debug purposes ;)
 			gameObject.name = new StringBuilder("(" + lowerCorner.x + ", " + lowerCorner.y + ", " + lowerCorner.z + ")").ToString();
 		}
@@ -119,11 +116,10 @@ namespace CogBlock
 		/// <param name="parent">The parent game object, typically expected to either be something derived from Cubiquity.Volume OR another Octree Node of an identical type.</param>
 		public virtual void AttachParent(GameObject parent)
 		{
-			//in an attempt to prevent -= on a null when silly people get involved ;)
-			if(lowerCorner)
-				gameObject.transform.localPosition = lowerCorner;
+			//Start off with this assumption; we'll subtract the parentNode's corner if we have a parentNode
+			gameObject.transform.localPosition = lowerCorner;
 
-			//we Should be the child of something, but just in case...
+			//we Should be the child of something, but just in case... (Hey it worries me whether !parent works... null is odd in some languages)
 			if(!parent)	return;
 			
 			//yay unity-relevant initialization stuff
@@ -262,7 +258,7 @@ namespace CogBlock
 			}
 
 			//-------------------------------------------
-			//			PHASE THREE: RECURSE!
+			//			PHASE TWO: RECURSE!
 			//-------------------------------------------
 
 			//we needs to know if any children were ever used in the making of this node. (that way we can children == null) at the end if necessary.
@@ -292,8 +288,8 @@ namespace CogBlock
 				{
 					//check to make sure we aren't about to dispose and a nonexistant child/array.
 					//Use continue to check the next child
-					if(!children) continue;
-					if(!children[i]) continue;
+					if(children == null) continue;
+					if(children[i] == null) continue;
 
 					//Testing will need to be done, but TECHNICALLY this should destroy not only the octree node, but all octree nodes that come afterward (because it is
 					//done on the game object, and the game object is the parent of the other octreenodes game objects)
@@ -304,16 +300,16 @@ namespace CogBlock
 				}
 
 				//if we need a child Node and haven't even a child array, we need to init the array. 
-				else if(!children)
+				else if(children == null)
 				{
-					children = new OctreeNodeAlt[8](null, null, null, null, null, null, null, null);
+					children = new OctreeNodeAlt[8]{null, null, null, null, null, null, null, null};
 				}
 
 				//nab the child Node Handle
 				uint childNodeHandle = CubiquityDLL.GetChildNode(nodeHandle, x, y, z);		
 
 				//and create the Unity-side child, if necessary
-				children[i] = SetChild (i, childNodeHandle);
+				SetChild (i, childNodeHandle);
 
 				//and synchronize the child if syncs are available.
 				availableNodeSyncs = children[i].SyncNode(availableNodeSyncs);
@@ -323,23 +319,10 @@ namespace CogBlock
 			}
 
 			//delete children array to save space. 
-			if(usedChildren == 0) children = null;
+			if(usedChildren == false) children = null;
 
 			//return any Syncs we have left!
 			return availableNodeSyncs;
-		}
-
-
-		protected OctreeNodeAlt GetChild(uint x, uint y, uint z)
-		{
-			//I love bit shifting for flatteninig things
-			uint i = x + y<<1 + z<<2;
-
-			//make sure we're not out of bounds, and that we have an array to search in
-			if(i > 8 || !children) return null;
-
-			return children[i];
-
 		}
 
 		/// <summary>
@@ -360,9 +343,14 @@ namespace CogBlock
 				}
 				this.children = null;
 			}
-		
-			this.lowerCorner = null;
 
+
+		}
+
+		public void DisposeChild(uint i)
+		{
+			Destroy (children[i].gameObject);
+			children[i] = null;
 		}
 	
 		/// <summary>
@@ -373,41 +361,12 @@ namespace CogBlock
 		protected void SetChild(uint i, uint childNodeHandle)
 		{
 			if(children[i] != null)
-				if(children[i].nodeHandle = childNodeHandle) return;
-			else DisposeChild(i);
-			children[i] = OctreeNodeAlt.CreateOctreeNode(this.GetType(), childNodeHandle, gameObject);
-		}
-
-		/// <summary>
-		/// This function is 'safe' in that it checks that x, y, and z are all in range (ie: x < 2), and whether children is null. It will avoid creating a node that already exists, and will delete a misplaced node entirely. It also takes in an x, y, z parameter, which may make more sense to the outside.
-		/// </summary>
-		/// <returns>The child, in case it is needed</returns>
-		/// <param name="x">The x coordinate.</param>
-		/// <param name="y">The y coordinate.</param>
-		/// <param name="z">The z coordinate.</param>
-		/// <param name="childNodeHandle">Octree handle from CubiquityDLL that we are trying to create.</param>
-
-		public OctreeNodeAlt SetChild(uint x, uint y, uint z, uint childNodeHandle)
-		{
-			//i love bit shifting
-			uint i = x + y<<1 + z<<2;
-
-			//make sure no errors occur
-			if(i>8) return;
-
-			//nodes are not initialized with this array. Keeps down costs for leaves
-			if(children == null) children = new OctreeNodeAlt[8](null, null, null, null, null, null, null, null);
-
-			if(children[i] != null)
 			{
-				if(children[i].nodeHandle == childNodeHandle) return children[i];
-				else DisposeChild(x, y, z);
+				if(children[i].nodeHandle == childNodeHandle) return;
+				else DisposeChild(i);
 			}
-
-			//create a child node of the same type!
 			children[i] = OctreeNodeAlt.CreateOctreeNode(this.GetType(), childNodeHandle, gameObject);
-			return children[i];
 		}
-		
+
 	}
 }

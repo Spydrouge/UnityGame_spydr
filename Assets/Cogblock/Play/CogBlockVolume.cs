@@ -19,8 +19,9 @@ namespace CogBlock
 	[ExecuteInEditMode]
 	public class CogBlockVolume: Volume
 	{
-		int debugvar = 4;
-		int otherdebug = 1;
+
+
+		public CogBlockOctreeNode rootOctreeNode = null;
 
 		//we do not currently HAVE CogBlockVolumeData
 
@@ -58,7 +59,7 @@ namespace CogBlock
 			newObject.AddComponent<CogBlockVolume>().data = data;
 
 			//Add the other important components
-			CogBlockVolumeRenderer volRend = newObject.AddComponent<CogBlockVolumeRenderer>(); 
+			/*CogBlockVolumeRenderer volRend = */newObject.AddComponent<CogBlockVolumeRenderer>(); 
 			newObject.AddComponent<CogBlockVolumeCollider>(); 
 
 			/*//initialize the volume renderer so that it's normals face in the correct direction
@@ -155,16 +156,15 @@ namespace CogBlock
 			{		
 				uint rootNodeHandle = CubiquityDLL.GetRootOctreeNode(data.volumeHandle.Value);
 				
-				if(rootOctreeNodeGameObject == null)
+				if(rootOctreeNode == null)
 				{
-					rootOctreeNodeGameObject = OctreeNodeAlt.CreateOctree(typeof(CogBlockOctreeNode), rootNodeHandle, gameObject);	
+					rootOctreeNode = OctreeNodeAlt.CreateOctreeNode(typeof(CogBlockOctreeNode), rootNodeHandle, gameObject) as CogBlockOctreeNode;	
+					rootOctreeNodeGameObject = rootOctreeNode.gameObject;
 				}
-				
-				OctreeNodeAlt rootOctreeNode = rootOctreeNodeGameObject.GetComponent<OctreeNodeAlt>();
-				int nodeSyncsPerformed = rootOctreeNode.syncNode(maxNodesPerSync, gameObject);
-				
-				// Set flat for us/editor-user.
-				isMeshSyncronized = (nodeSyncsPerformed == 0);
+
+				//Sync the Node and remember it will return syncs remaining. If some are remaining, the mesh is syncronized.
+				isMeshSyncronized = (rootOctreeNode.SyncNode(maxNodesPerSync) != 0);
+
 			}
 		}
 	}
