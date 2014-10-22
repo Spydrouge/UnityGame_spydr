@@ -23,25 +23,7 @@ namespace CogBlock
 		[System.NonSerialized]
 		public Vector3 lowerCorner;
 		[System.NonSerialized]
-		public GameObject[,,] children;
-
-		//This is a really goofy little way of flatting out an array that looks at the children
-		//of any node on the x, y, and z axis. There are 8 possible children, and they have
-		//coordinates as are specified by the cixs, ciys, and cizs arrays below
-		// cixs stands for 'child iteration xs'
-
-		[System.NonSerialized]
-		/// <summary> The x coordinates of any node's children, laid out flat </summary>
-		public static int[] cixs = {0, 0, 0, 0, 1, 1, 1, 1};
-		[System.NonSerialized]
-		/// <summary> The y coordinates of any node's children, laid out flat </summary>
-		public static int[] ciys = {0, 0, 1, 1, 0, 0, 1, 1};
-		[System.NonSerialized]
-		/// <summary> The z coordinates of any node's children, laid out flat </summary>
-		public static int[] cizs = {0, 1, 0, 1, 0, 1, 0, 1};
-		[System.NonSerialized]
-		/// <summary> The number of child nodes any octree node must have </summary>
-		public static int cis = 8;
+		public OctreeNodeAlt[] children;
 
 		[System.NonSerialized]
 		/// <summary> We store this to reference the location CubiquityDLL is storing our Octree information. </summary>
@@ -63,7 +45,7 @@ namespace CogBlock
 		/// <param name="octreeType">A type derived from the class OctreeNodeAlt, specific to the volume for which this OctreeNodeAlt is to be created.</param>
 		/// <param name="nodeHandle">The node handle to give the OctreeNodeAlt</param>
 		/// <param name="parent">The parent game object of the OctreeNodeAlt</param>
-		public static GameObject CreateOctree(Type octreeType, uint nodeHandle, GameObject parent)
+		public static OctreeNodeAlt CreateOctreeNode(Type octreeType, uint nodeHandle, GameObject parent)
 		{
 			if(octreeType == null) 
 			{
@@ -87,11 +69,11 @@ namespace CogBlock
 			node.InitializeObj(null);
 			node.AttachParent(parent);
 
-			return obj;
+			return node;
 		}
 
 		/// <summary>
-		/// Initializes the GameObject to which a new node will belong, and does not have to be called by the average Editor-User. Already called in CreateOctree, immediately after InitializeNode.
+		/// Initializes the GameObject to which a new node will belong, and does not have to be called by the average Editor-User. Already called in CreateOctreeNode, immediately after InitializeNode.
 		/// It may be overwritten with care (nodeHandle is particularly important).
 		/// </summary>
 		/// <param name="nodeHandle">The CubiquityDLL handle of the node we're creating. </param>
@@ -107,7 +89,7 @@ namespace CogBlock
 		}
 
 		/// <summary>
-		/// Initializes the GameObject to which a new node will belong, and does not have to be called by the average Editor-User. Typically called in CreateOctree, immediately after InitializeNode.
+		/// Initializes the GameObject to which a new node will belong, and does not have to be called by the average Editor-User. Typically called in CreateOctreeNode, immediately after InitializeNode.
 		/// It may be overwritten with care (particularly in building the localPosition)
 		/// </summary>
 		/// <param name="arg">Unused argument parameter, in the event a future Editor-User wishes to overwrite this function and send in parameters.</param>
@@ -131,7 +113,7 @@ namespace CogBlock
 		}
 
 		/// <summary>
-		/// Performs operations on a new OctreeNodeAlt GameObject, and does not have to be called by the average Editor-User. Typically called in CreateOctree, immediately after InitializeNode.
+		/// Performs operations on a new OctreeNodeAlt GameObject, and does not have to be called by the average Editor-User. Typically called in CreateOctreeNode, immediately after InitializeNode.
 		/// It may be overwritten with care (particularly in building the localPosition)
 		/// </summary>
 		/// <param name="parent">The parent game object, typically expected to either be something derived from Cubiquity.Volume OR another Octree Node of an identical type.</param>
@@ -258,9 +240,6 @@ namespace CogBlock
 			//terminator of the all-powerful recursion
 			if(availableNodeSyncs <= 0) return 0;
 
-			//initialize and track this
-			int nodeSyncsPerformed = 0;
-
 			//-------------------------------------------
 			//				PHASE ONE: Building Meshes!
 			//-------------------------------------------
@@ -280,83 +259,102 @@ namespace CogBlock
 				//explore the whole tree @.@
 				meshLastSyncronised = CubiquityDLL.GetCurrentTime();
 				availableNodeSyncs--;
-				nodeSyncsPerformed++;
 			}
-
-
-
-
 
 			//-------------------------------------------
 			//			PHASE THREE: RECURSE!
 			//-------------------------------------------
+			uint unusedChildren = 0;
 
 			//normally we would have to iterate across the two x children, the two y children, and the two z children using 3 nested
 			//for-loops. Typically speaking, nesting for loops in a recursive function causes nausea, dry mouth, dizzinss and vomiting. 
-			//So we're having a little fun using static arrays to try and flatten the loops
-			//Using cixs, ciys, cizs, and cis.
-
-			//note, we could also do something fun with ifs. the structure would be like this:
-			//		for(uint x =0, y = 0, z = 0;; x++)
-			//		{
-			//			if(x > 1) {y++; x=0;}
-			//			if(y > 1) {z++; y=0;}
-			//			if(z > 1) break;
-
-			uint x, y, z;
-			for(uint i = 0; i < cis; i++)
+			//Let's flatten the array!
+			for(uint x =0, y = 0, z = 0, i = 0;; x++, i++)
 			{
-				//helper variables
-				x = cixs[i]; 
-				y = ciys[i]; 
-				z = cizs[i];
+				//iteration code!
+				if(x > 1) {y++; x=0;}
+				if(y > 1) {z++; y=0;}
+				if(z > 1) break;
 
-				if(CubiquityDLL.HasChildNode(nodeHandle, x, y, z) == 1)
-						{					
-							
-							uint childNodeHandle = CubiquityDLL.GetChildNode(nodeHandle, x, y, z);					
-							
-							GameObject childGameObject = GetChild(x,y,z);
-							
-							if(childGameObject == null)
-							{							
-								childGameObject = OctreeNodeAlt.CreateOctree(octreeType, childNodeHandle, gameObject);
-								
-								SetChild(x, y, z, childGameObject);
-							}
-							
-							//syncNode(childNodeHandle, childGameObject);
-							
-							OctreeNodeAlt childOctreeNode = childGameObject.GetComponent<OctreeNodeAlt>();
-							int syncs = childOctreeNode.syncNode(availableNodeSyncs, voxelTerrainGameObject);
-							availableNodeSyncs -= syncs;
-							nodeSyncsPerformed += syncs;
+				//Steps:
+				// 1) Ascertain whether we SHOULD have a node
+				// 1.5) Ascertain whether we have a children array.
+				// 2) Ascertain whether we DO have a node
+				// 3) Match/Sync Them
 
+				bool needChildNode = (CubiquityDLL.HasChildNode(nodeHandle, x, y, z) == 1);
+
+				//if we need a child Node and have none, we need to init the array. If we need no children but have them, we need to unmake them. 
+				if(needChildNode && !children) 
+				{
+					children = new OctreeNodeAlt[8](null, null, null, null, null, null, null, null);
+				}
+				else if(!needChildNode && children) 
+				{
+					if(children[i])
+						DisposeChild(i); 
+					continue;
+				}
+
+				//Useage of the "?" operator!!!!!
+				//  	condition ? first_expression : second_expression;
+				//		if condition == true, whole block evaluates as first_expression. If condition == false, whole block evaluates as  second_expression
+				OctreeNodeAlt childNode = GetChild(x,y,z);
+
+				//check if there's a child on the dll side
+				if(CubiquityDLL.HasChildNode(nodeHandle, x, y, z) != 1)
+				{	
+					//Dispose of this child and try the next one immediately
+					DisposeChild(x, y, z);
+					continue;
+				}
+
+				//nab the child Node Handle
+				uint childNodeHandle = CubiquityDLL.GetChildNode(nodeHandle, x, y, z);					
+
+				//make sure our helper array knows about this child.
+				SetChild(x, y, z, childNodeHandle);
+
+				//and synchronize the child
+				availableNodeSyncs = childNode.SyncNode(availableNodeSyncs);
 			}
+
 			
-			return nodeSyncsPerformed;
+			return availableNodeSyncs;
+		}
+
+
+		protected OctreeNodeAlt GetChild(uint x, uint y, uint z)
+		{
+			//I love bit shifting for flatteninig things
+			uint i = x + y<<1 + z<<2;
+
+			//make sure we're not out of bounds, and that we have an array to search in
+			if(i > 8 || !children) return null;
+
+			return children[i];
+
 		}
 		
-		public GameObject GetChild(uint x, uint y, uint z)
+		protected void SetChild(uint x, uint y, uint z, uint childNodeHandle)
 		{
-			if(children != null)
+			//i love bit shifting
+			uint i = x + y<<1 + z<<2;
+
+			//make sure no errors occur
+			if(i>8) return;
+
+			//nodes are not initialized with this array. Keeps down costs for leaves
+			if(children == null) children = new OctreeNodeAlt[8](null, null, null, null, null, null, null, null);
+
+			if(children[i] != null)
 			{
-				return children[x, y, z];
+				if(children[i].nodeHandle == childNodeHandle) return;
+				else DisposeChild(x, y, z)
 			}
-			else
-			{
-				return null;
-			}
-		}
-		
-		public void SetChild(uint x, uint y, uint z, GameObject gameObject)
-		{
-			if(children == null)
-			{
-				children = new GameObject[2, 2, 2];
-			}
-			
-			children[x, y, z] = gameObject;
+
+			//create a child node of the same type!
+			children[i] = OctreeNodeAlt.CreateOctreeNode(this.GetType(), childNodeHandle, gameObject);
 		}
 		
 	}
