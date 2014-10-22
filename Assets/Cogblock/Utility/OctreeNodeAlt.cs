@@ -7,7 +7,9 @@ using UnityEditor;
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
+
 
 using Cubiquity;
 
@@ -19,15 +21,30 @@ namespace CogBlock
 		[System.NonSerialized]
 		public uint meshLastSyncronised;
 		[System.NonSerialized]
-		public uint lastSyncronisedWithVolumeRenderer;
-		[System.NonSerialized]
-		public uint lastSyncronisedWithVolumeCollider;
-		[System.NonSerialized]
 		public Vector3 lowerCorner;
 		[System.NonSerialized]
 		public GameObject[,,] children;
-		
+
+		//This is a really goofy little way of flatting out an array that looks at the children
+		//of any node on the x, y, and z axis. There are 8 possible children, and they have
+		//coordinates as are specified by the cixs, ciys, and cizs arrays below
+		// cixs stands for 'child iteration xs'
+
 		[System.NonSerialized]
+		/// <summary> The x coordinates of any node's children, laid out flat </summary>
+		public static int[] cixs = {0, 0, 0, 0, 1, 1, 1, 1};
+		[System.NonSerialized]
+		/// <summary> The y coordinates of any node's children, laid out flat </summary>
+		public static int[] ciys = {0, 0, 1, 1, 0, 0, 1, 1};
+		[System.NonSerialized]
+		/// <summary> The z coordinates of any node's children, laid out flat </summary>
+		public static int[] cizs = {0, 1, 0, 1, 0, 1, 0, 1};
+		[System.NonSerialized]
+		/// <summary> The number of child nodes any octree node must have </summary>
+		public static int cis = 8;
+
+		[System.NonSerialized]
+		/// <summary> We store this to reference the location CubiquityDLL is storing our Octree information. </summary>
 		public uint nodeHandle;
 
 		//at a later date, there shall be a better way of handling both of these
@@ -159,9 +176,9 @@ namespace CogBlock
 		/// It is left 'virtual' instead of 'abstract' so that OctreeNodeAlt can be instantiated as a placeholder in the event that all hell breaks loose somewhere
 		/// else in the code.
 		/// </summary>
-		public virtual void BuildMesh()
+		public virtual Mesh BuildMesh()
 		{
-
+			return null;
 		}
 
 		/// <summary>
@@ -198,9 +215,15 @@ namespace CogBlock
 				if(meshFilter.sharedMesh != null) DestroyImmediate(meshFilter.sharedMesh);
 							
 				//FIXME: Can I figure out a good explanation for wtf this is using .sharedMesh instead of .mesh for?
-				//In any event, send in the mesh and attach the material. 
+				//In any event, send in the mesh 
 				meshFilter.sharedMesh = mesh;
+
+				//and then nab the choices made in volRend
 				meshRenderer.sharedMaterial = volRend.material;
+				meshRenderer.enabled = volRend.enabled;
+				meshRenderer.castShadows = volRend.castShadows;
+				meshRenderer.receiveShadows = volRend.receiveShadows;
+
 				
 				#if UNITY_EDITOR
 					EditorUtility.SetSelectedWireframeHidden(meshRenderer, true);
@@ -211,10 +234,17 @@ namespace CogBlock
 			if(volColl && Application.isPlaying)
 			{
 				MeshCollider meshCollider = gameObject.GetOrAddComponent<MeshCollider>() as MeshCollider;
-				meshCollider.sharedMesh = mesh;
-			}
 
-			
+				//send in the mesh
+				meshCollider.sharedMesh = mesh;
+
+				//and then nab the choices made in volColl
+			}
+		}
+
+		public void RelayRendererChanges(VolumeRenderer volRend)
+		{
+
 		}
 		
 		//The purpose of availableNodeSyncs is because: This function is recursive. availableNodeSyncs tells it how deep to plumb
@@ -254,56 +284,34 @@ namespace CogBlock
 			}
 
 
-			//-------------------------------------------
-			//			PHASE TWO: Synchronize Renderer and Collider
-			//-------------------------------------------
-			
-			VolumeRenderer vr = voxelTerrainGameObject.GetComponent<VolumeRenderer>();
-			MeshRenderer mr = gameObject.GetComponent<MeshRenderer>();
-			if(vr != null && mr != null)
-			{
-				if(mr.enabled != vr.enabled) // Not sure we really need this check?
-				{
-					mr.enabled = vr.enabled;
-				}
-				
-				if(lastSyncronisedWithVolumeRenderer < vr.lastModified)
-				{
-					mr.receiveShadows = vr.receiveShadows;
-					mr.castShadows = vr.castShadows;
-					lastSyncronisedWithVolumeRenderer = Clock.timestamp;
-				}
-			}
-			
-			VolumeCollider vc = voxelTerrainGameObject.GetComponent<VolumeCollider>();
-			MeshCollider mc = gameObject.GetComponent<MeshCollider>();
-			if(vc != null && mc != null)
-			{
-				if(mc.enabled != vc.enabled) // Not sure we really need this check?
-				{
-					mc.enabled = vc.enabled;
-				}
-				
-				if(lastSyncronisedWithVolumeCollider < vc.lastModified)
-				{
-					// Actual syncronization to be filled in in the future when we have something to syncronize.
-					lastSyncronisedWithVolumeCollider = Clock.timestamp;
-				}
-			}
+
 
 
 			//-------------------------------------------
 			//			PHASE THREE: RECURSE!
 			//-------------------------------------------
-			
-			//Now syncronise any children
-			for(uint z = 0; z < 2; z++)
+
+			//normally we would have to iterate across the two x children, the two y children, and the two z children using 3 nested
+			//for-loops. Typically speaking, nesting for loops in a recursive function causes nausea, dry mouth, dizzinss and vomiting. 
+			//So we're having a little fun using static arrays to try and flatten the loops
+			//Using cixs, ciys, cizs, and cis.
+
+			//note, we could also do something fun with ifs. the structure would be like this:
+			//		for(uint x =0, y = 0, z = 0;; x++)
+			//		{
+			//			if(x > 1) {y++; x=0;}
+			//			if(y > 1) {z++; y=0;}
+			//			if(z > 1) break;
+
+			uint x, y, z;
+			for(uint i = 0; i < cis; i++)
 			{
-				for(uint y = 0; y < 2; y++)
-				{
-					for(uint x = 0; x < 2; x++)
-					{
-						if(CubiquityDLL.HasChildNode(nodeHandle, x, y, z) == 1)
+				//helper variables
+				x = cixs[i]; 
+				y = ciys[i]; 
+				z = cizs[i];
+
+				if(CubiquityDLL.HasChildNode(nodeHandle, x, y, z) == 1)
 						{					
 							
 							uint childNodeHandle = CubiquityDLL.GetChildNode(nodeHandle, x, y, z);					
@@ -323,9 +331,7 @@ namespace CogBlock
 							int syncs = childOctreeNode.syncNode(availableNodeSyncs, voxelTerrainGameObject);
 							availableNodeSyncs -= syncs;
 							nodeSyncsPerformed += syncs;
-						}
-					}
-				}
+
 			}
 			
 			return nodeSyncsPerformed;
