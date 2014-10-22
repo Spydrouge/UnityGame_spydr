@@ -1,29 +1,18 @@
 ********************************************************************************
 *                             Initializing Cubiquity                           *
 ********************************************************************************
-[17:10:52, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
-[17:10:52, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[17:10:55, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
-[17:10:55, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[17:11:37, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
-[17:11:37, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[17:12:55, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
-[17:12:55, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[17:13:18, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
-[17:13:18, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[17:13:31, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
-[17:14:10, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[17:14:11, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
-[17:14:47, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[17:14:48, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
-[17:15:32, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[17:15:33, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
-[17:15:43, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
-[17:15:43, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[17:16:19, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[17:16:20, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
-[17:16:20, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-********************************************************************************
-*                             Shutting down Cubiquity                          *
-********************************************************************************
-
+[17:20:19, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
+[17:20:19, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:23:44, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
+[17:23:44, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:25:21, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
+[17:26:44, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:26:45, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
+[17:27:03, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:27:04, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
+[17:28:03, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:28:03, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
+[17:28:37, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:28:38, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
+[17:29:57, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:29:58, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'

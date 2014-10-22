@@ -167,7 +167,7 @@ namespace CogBlock
 		/// </summary>
 		protected virtual void NodeMeshDown()
 		{
-			//Debug.Log ("NodeMeshDown");
+			Debug.Log ("NodeMeshDown");
 			MeshCollider meshCollider = gameObject.GetComponent<MeshCollider>() as MeshCollider;
 			if(meshCollider) DestroyImmediate(meshCollider);
 			
@@ -207,6 +207,8 @@ namespace CogBlock
 				meshRenderer.castShadows = volRend.castShadows;
 				meshRenderer.receiveShadows = volRend.receiveShadows;
 
+				Debug.Log ("MeshRenderer: " +meshRenderer.ToString ());
+
 				
 				#if UNITY_EDITOR
 					EditorUtility.SetSelectedWireframeHidden(meshRenderer, true);
@@ -214,7 +216,7 @@ namespace CogBlock
 			}
 			else
 			{
-				//Debug.Log ("VolRendWentMissing");
+				Debug.Log ("VolRendWentMissing");
 			}
 
 			//throw in the same mesh  to collider and find out later if that was a bad idea XD
