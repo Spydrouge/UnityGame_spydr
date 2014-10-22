@@ -27,12 +27,16 @@ namespace CogBlock
 			// At some point I should read this: http://forum.unity3d.com/threads/5687-C-plugin-pass-arrays-from-C
 
 			Vector3 offset = new Vector3(0.5f, 0.5f, 0.5f); // Required for the CubicVertex decoding process.
-
+			
 			// Meshes for rendering and collition.
 			Mesh mesh = new Mesh();		
-
+			
 			//prevents memory leaks >:)
 			mesh.hideFlags = HideFlags.DontSave;
+			
+			//Debug.Log(CubiquityDLL.NodeHasMesh(nodeHandle));
+			//Debug.Log ("Hello");
+			//Debug.Log(nodeHandle);
 
 			// Get the data from where it is stored in Cubiquity.
 			int[] indices = CubiquityDLL.GetIndices(nodeHandle);		
@@ -41,6 +45,7 @@ namespace CogBlock
 			// Create the arrays which we'll copy the data to.
 			Vector3[] rendererVertices = new Vector3[cubiquityVertices.Length];	
 			Color32[] rendererColors = new Color32[cubiquityVertices.Length];
+
 
 			//translate the data from Cubiquity's forms to Unity's
 			for(int ct = 0; ct < cubiquityVertices.Length; ct++)
@@ -67,7 +72,11 @@ namespace CogBlock
 			// FIXME - Get proper bounds
 			mesh.bounds.SetMinMax(new Vector3(0.0f, 0.0f, 0.0f), new Vector3(32.0f, 32.0f, 32.0f));
 
+
+
 			return mesh;
+			//return null;
+		
 		}
 	}
 }

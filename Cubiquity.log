@@ -1,8 +1,29 @@
 ********************************************************************************
 *                             Initializing Cubiquity                           *
 ********************************************************************************
-[15:11:30, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
-[15:11:50, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
-[15:11:51, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
-[15:12:13, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
-[15:12:13, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:10:52, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
+[17:10:52, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:10:55, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
+[17:10:55, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:11:37, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
+[17:11:37, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:12:55, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
+[17:12:55, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:13:18, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
+[17:13:18, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:13:31, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
+[17:14:10, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:14:11, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
+[17:14:47, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:14:48, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
+[17:15:32, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:15:33, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/Cubiquity/VoxelDatabases/62D879E1.vdb'
+[17:15:43, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
+[17:15:43, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:16:19, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+[17:16:20, Info   ]: Creating voxel database from 'D:/Users/Melissa/GIT/UnityGame_spydr/Assets/StreamingAssets/CubSub/VoxelDatabases/vdb/Bananavdb.vdb'
+[17:16:20, Info   ]: Resizing temp buffer to 32768bytes. This should only happen the first time the MinizBlockCompressor is used
+********************************************************************************
+*                             Shutting down Cubiquity                          *
+********************************************************************************
+

@@ -57,7 +57,7 @@ namespace CogBlock
 				Debug.LogWarning("OctreeNodeAlt->CreateOctreeNode was passed a type ("+octreeType+") that does not inherit from OctreeNodeAlt. Attempting to fail gracefully by creating a non-functional OctreeNodeAlt.");
 				octreeType = typeof(OctreeNodeAlt);
 			}
-						
+								
 			//new object
 			GameObject obj = new GameObject();
 		
@@ -97,7 +97,7 @@ namespace CogBlock
 		{
 			//Allows us not to view octree objects while studying the gamestate.
 			//i can turn this off for debugging purposes. 
-			gameObject.hideFlags = HideFlags.HideInHierarchy;
+			//gameObject.hideFlags = HideFlags.HideInHierarchy;
 			
 			//zeroing out stuff!
 			//(0,0,0), (0,0,0,0), (1,1,1)
@@ -120,7 +120,7 @@ namespace CogBlock
 			gameObject.transform.localPosition = lowerCorner;
 
 			//we Should be the child of something, but just in case... (Hey it worries me whether !parent works... null is odd in some languages)
-			if(!parent)	return;
+			if(parent == null)	return;
 			
 			//yay unity-relevant initialization stuff
 			gameObject.layer = parent.layer;
@@ -130,8 +130,9 @@ namespace CogBlock
 			OctreeNodeAlt parentNode = parent.GetComponent<OctreeNodeAlt>();
 
 			//if there is no parent node...
-			if(parentNode)
+			if(parentNode != null)
 			{
+				//Debug.Log ("No Parents");
 				//Transform the localposition by the parentnode
 				gameObject.transform.localPosition -= parentNode.lowerCorner;
 
@@ -141,12 +142,14 @@ namespace CogBlock
 			}
 			else
 			{
+				//Debug.Log ("Volume renderer and collider successfully passed to root.");
 				//otherwise I really hope this is the child of a Volume!
 				volRend = parent.GetComponent<VolumeRenderer>();
 				volColl = parent.GetComponent<VolumeCollider>();
+
 			}
 
-		
+			//Debug.Log ("Testing VolRend & VolColl: " + volRend.ToString() + volColl.ToString());
 		}
 
 		/// <summary>
@@ -164,6 +167,7 @@ namespace CogBlock
 		/// </summary>
 		protected virtual void NodeMeshDown()
 		{
+			//Debug.Log ("NodeMeshDown");
 			MeshCollider meshCollider = gameObject.GetComponent<MeshCollider>() as MeshCollider;
 			if(meshCollider) DestroyImmediate(meshCollider);
 			
@@ -185,6 +189,7 @@ namespace CogBlock
 			//throw in the mesh render schtuff if and only if there's even a volRend component to begin with.
 			if(volRend)
 			{
+				//Debug.Log ("VolRendFound");
 				//Make sure these components exist, and nab hold of them
 				MeshFilter meshFilter = gameObject.GetOrAddComponent<MeshFilter>() as MeshFilter;
 				MeshRenderer meshRenderer = gameObject.GetOrAddComponent<MeshRenderer>() as MeshRenderer;
@@ -207,6 +212,10 @@ namespace CogBlock
 					EditorUtility.SetSelectedWireframeHidden(meshRenderer, true);
 				#endif
 			}
+			else
+			{
+				//Debug.Log ("VolRendWentMissing");
+			}
 
 			//throw in the same mesh  to collider and find out later if that was a bad idea XD
 			if(volColl && Application.isPlaying)
@@ -218,6 +227,7 @@ namespace CogBlock
 
 				//and then nab the choices made in volColl
 			}
+
 		}
 
 		public void RelayRendererChanges(VolumeRenderer volRend)
@@ -243,13 +253,14 @@ namespace CogBlock
 			//is a synchronization even called for?
 			uint meshLastUpdated = CubiquityDLL.GetMeshLastUpdated(nodeHandle);		
 
+
 			//we don't have to synchronize this node if it wasn't updated.
-			if(meshLastSyncronised >= meshLastUpdated)
+			if(meshLastSyncronised < meshLastUpdated)
 			{
 				//I like major control branches that are concise to read!
 				if(CubiquityDLL.NodeHasMesh(nodeHandle) == 1)
-					NodeMeshDown ();
-				else NodeMeshUp ();
+					NodeMeshUp ();
+				else NodeMeshDown();
 
 				//absolutely do not decrement availableNodesyncs if no meshSyncing occured, or we'll never 
 				//explore the whole tree @.@
@@ -343,11 +354,11 @@ namespace CogBlock
 				}
 				this.children = null;
 			}
-
+			//Debug.Log ("Destroyed");
 
 		}
 
-		public void DisposeChild(uint i)
+		protected void DisposeChild(uint i)
 		{
 			Destroy (children[i].gameObject);
 			children[i] = null;
@@ -362,10 +373,20 @@ namespace CogBlock
 		{
 			if(children[i] != null)
 			{
-				if(children[i].nodeHandle == childNodeHandle) return;
-				else DisposeChild(i);
+				if(children[i].nodeHandle == childNodeHandle)
+				{
+					return;
+				}
+				else 
+				{
+					//Debug.Log ("Could this be the culprit making the infinite? Trace node Handle|childNodeHandle: " + children[i].nodeHandle + "|" + childNodeHandle);
+					DisposeChild(i);
+				}
 			}
+
+
 			children[i] = OctreeNodeAlt.CreateOctreeNode(this.GetType(), childNodeHandle, gameObject);
+
 		}
 
 	}

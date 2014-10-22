@@ -20,7 +20,7 @@ namespace CogBlock
 	public class CogBlockVolume: Volume
 	{
 
-
+		[System.NonSerialized]
 		public CogBlockOctreeNode rootOctreeNode = null;
 
 		//we do not currently HAVE CogBlockVolumeData
@@ -154,10 +154,10 @@ namespace CogBlock
 			//try to synchronize the octrees
 			if(CubiquityDLL.HasRootOctreeNode(data.volumeHandle.Value) == 1)
 			{		
-				uint rootNodeHandle = CubiquityDLL.GetRootOctreeNode(data.volumeHandle.Value);
-				
-				if(rootOctreeNode == null)
+				if(rootOctreeNode == null || rootOctreeNodeGameObject == null)
 				{
+					Debug.Log("Creating RootOctreeNode from null");
+					uint rootNodeHandle = CubiquityDLL.GetRootOctreeNode(data.volumeHandle.Value);
 					rootOctreeNode = OctreeNodeAlt.CreateOctreeNode(typeof(CogBlockOctreeNode), rootNodeHandle, gameObject) as CogBlockOctreeNode;	
 					rootOctreeNodeGameObject = rootOctreeNode.gameObject;
 				}
