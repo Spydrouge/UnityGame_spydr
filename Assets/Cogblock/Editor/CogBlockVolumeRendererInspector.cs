@@ -32,6 +32,21 @@ namespace CogBlock
 			EditorGUILayout.BeginHorizontal();
 			renderer.material = EditorGUILayout.ObjectField("Material: ", renderer.material, typeof(Material), true) as Material;
 			EditorGUILayout.EndHorizontal();
+
+
+
+			if(!GUI.changed)return;
+			
+			CogBlockVolume vol = renderer.gameObject.GetComponentInChildren<CogBlockVolume>() as CogBlockVolume;
+			if(vol != null)
+			{
+				//Debug.Log("GuiChange detected");
+				//for some reason, trying to get the octreenode from here resulted in CATASTROPHIC MELTDOWN where OctreeNodeAlt reported no children.
+				//Do I understand? Nupe. This works better anyway by talking only to volume
+				vol.RelayComponentChanges = true;
+			}
+
+
 		}
 	}
 }

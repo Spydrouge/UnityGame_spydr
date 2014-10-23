@@ -23,6 +23,8 @@ namespace CogBlock
 		[System.NonSerialized]
 		public CogBlockOctreeNode rootOctreeNode = null;
 
+		public Boolean RelayComponentChanges = false;
+
 		//we do not currently HAVE CogBlockVolumeData
 
 		/// <summary>
@@ -156,7 +158,7 @@ namespace CogBlock
 			{		
 				if(rootOctreeNode == null || rootOctreeNodeGameObject == null)
 				{
-					Debug.Log("Creating RootOctreeNode from null");
+					//Debug.Log("Creating RootOctreeNode from null");
 					uint rootNodeHandle = CubiquityDLL.GetRootOctreeNode(data.volumeHandle.Value);
 					rootOctreeNode = OctreeNodeAlt.CreateOctreeNode(typeof(CogBlockOctreeNode), rootNodeHandle, gameObject) as CogBlockOctreeNode;	
 					rootOctreeNodeGameObject = rootOctreeNode.gameObject;
@@ -164,6 +166,11 @@ namespace CogBlock
 
 				//Sync the Node and remember it will return syncs remaining. If some are remaining, the mesh is syncronized.
 				isMeshSyncronized = (rootOctreeNode.SyncNode(maxNodesPerSync) != 0);
+
+				if(RelayComponentChanges)
+				{
+					rootOctreeNode.RelayComponentChanges();
+				}
 
 			}
 		}

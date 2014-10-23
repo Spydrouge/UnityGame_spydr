@@ -22,7 +22,9 @@ namespace CogBlock
 		public uint meshLastSyncronised;
 		[System.NonSerialized]
 		public Vector3 lowerCorner;
+
 		[System.NonSerialized]
+		/// <summary> OctreeNodes may have up to eight children, or they may be leaf nodes. These nodes are organized on x/y/z planes and can be accessed with an index = x + y<<1 + z<<2/// </summary>
 		public OctreeNodeAlt[] children;
 
 		[System.NonSerialized]
@@ -97,7 +99,7 @@ namespace CogBlock
 		{
 			//Allows us not to view octree objects while studying the gamestate.
 			//i can turn this off for debugging purposes. 
-			//gameObject.hideFlags = HideFlags.HideInHierarchy;
+			gameObject.hideFlags = HideFlags.HideInHierarchy;
 			
 			//zeroing out stuff!
 			//(0,0,0), (0,0,0,0), (1,1,1)
@@ -116,15 +118,21 @@ namespace CogBlock
 		/// <param name="parent">The parent game object, typically expected to either be something derived from Cubiquity.Volume OR another Octree Node of an identical type.</param>
 		public virtual void AttachParent(GameObject parent)
 		{
-			//Start off with this assumption; we'll subtract the parentNode's corner if we have a parentNode
-			gameObject.transform.localPosition = lowerCorner;
 
 			//we Should be the child of something, but just in case... (Hey it worries me whether !parent works... null is odd in some languages)
-			if(parent == null)	return;
+			if(parent == null)	
+			{
+				gameObject.transform.localPosition = lowerCorner;
+				return;
+			}
 			
 			//yay unity-relevant initialization stuff
 			gameObject.layer = parent.layer;
-			gameObject.transform.parent = parent.transform; //this is actually what physically hooks them together. Compare to addChild really.
+			gameObject.transform.parent = parent.transform; //this is actually what physically hooks them together. It makes gameObject the child of parent
+
+			//this might seem odd to place here instead of at the top but the order we add transforms matters. If we change localPosition before the parent
+			//transform we'll get funny errors where the whole map condenses on itself.
+			gameObject.transform.localPosition = lowerCorner;
 			
 			//see if we are the child of a volume, or of another node...
 			OctreeNodeAlt parentNode = parent.GetComponent<OctreeNodeAlt>();
@@ -163,11 +171,10 @@ namespace CogBlock
 		}
 
 		/// <summary>
-		/// Protected function called by SynchNode() for code clarity. Most likely this should never be overwritten.
+		/// Protected function called by SynchNode() for code clarity. It removes collider and render components from the gameObject to which a node is attached. Most likely this should never be overwritten. 
 		/// </summary>
 		protected virtual void NodeMeshDown()
 		{
-			Debug.Log ("NodeMeshDown");
 			MeshCollider meshCollider = gameObject.GetComponent<MeshCollider>() as MeshCollider;
 			if(meshCollider) DestroyImmediate(meshCollider);
 			
@@ -197,8 +204,7 @@ namespace CogBlock
 				//make sure we release any previously existing dataz.
 				if(meshFilter.sharedMesh != null) DestroyImmediate(meshFilter.sharedMesh);
 							
-				//FIXME: Can I figure out a good explanation for wtf this is using .sharedMesh instead of .mesh for?
-				//In any event, send in the mesh 
+				//Although sharedMesh used to be read only and serve a slightly different purpose, it is currently replacing Mesh.mesh, which is depreciated 
 				meshFilter.sharedMesh = mesh;
 
 				//and then nab the choices made in volRend
@@ -207,7 +213,7 @@ namespace CogBlock
 				meshRenderer.castShadows = volRend.castShadows;
 				meshRenderer.receiveShadows = volRend.receiveShadows;
 
-				Debug.Log ("MeshRenderer: " +meshRenderer.ToString ());
+				//Debug.Log ("MeshRenderer: " +meshRenderer.ToString ());
 
 				
 				#if UNITY_EDITOR
@@ -216,12 +222,18 @@ namespace CogBlock
 			}
 			else
 			{
-				Debug.Log ("VolRendWentMissing");
+				//if we have no volumeRenderer, then we should have no meshRenderer
+				MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>() as MeshRenderer;
+				if(meshRenderer) DestroyImmediate(meshRenderer);
+				
+				MeshFilter meshFilter = gameObject.GetComponent<MeshFilter>() as MeshFilter;
+				if(meshFilter) DestroyImmediate(meshFilter);
 			}
 
 			//throw in the same mesh  to collider and find out later if that was a bad idea XD
 			if(volColl && Application.isPlaying)
 			{
+				//add the collider
 				MeshCollider meshCollider = gameObject.GetOrAddComponent<MeshCollider>() as MeshCollider;
 
 				//send in the mesh
@@ -229,13 +241,87 @@ namespace CogBlock
 
 				//and then nab the choices made in volColl
 			}
+			else
+			{
+				//if we have no volumecollider, we should have no meshcollider 
+
+				MeshCollider meshCollider = gameObject.GetComponent<MeshCollider>() as MeshCollider;
+				if(meshCollider) DestroyImmediate(meshCollider);
+			}
 
 		}
 
-		public void RelayRendererChanges(VolumeRenderer volRend)
+		/// <summary>
+		/// The purpose of this function is, if there has been a change in the VolumeRenderer or VolumeCollider on the Volume, to relay those changes down to the meshRenderer and meshCollider level through the OctreeNodeAlt. It is not built to handle if either component is removed, which should use ForceSync instead.
+		/// </summary>
+		public void RelayComponentChanges()
 		{
 
+			//get all the parameters out from volRend (this more or less mimics what's under NodeMeshUp)
+			MeshRenderer meshRenderer = gameObject.GetComponent<MeshRenderer>() as MeshRenderer;
+			if(meshRenderer != null && volRend != null)
+			{
+				//Debug.Log("Changing material to: " + volRend.material.ToString ());
+				meshRenderer.sharedMaterial = volRend.material;
+				meshRenderer.enabled = volRend.enabled;
+				meshRenderer.castShadows = volRend.castShadows;
+				meshRenderer.receiveShadows = volRend.receiveShadows;
+			}
+
+			//and from collider
+			MeshCollider meshCollider = gameObject.GetComponent<MeshCollider>() as MeshCollider;
+			if(meshCollider != null && volColl != null)
+			{
+				meshCollider.enabled = volColl.enabled;
+			}
+
+			if(children == null) return;
+
+			//this loop will iterate through all the children
+			for(uint i = 0; i < 8; i++)
+			{
+				if(children[i] != null)
+					children[i].RelayComponentChanges();
+			}
 		}
+
+		/// <summary>
+		/// This function can be used to force the entire mesh to sync on next update, which is useful in situations where a very important top level component has changed dramatically (ie, if volumeRenderer is gone).
+		/// </summary>
+		public void ForceSync()
+		{
+			//see if we can get our parent node
+			OctreeNodeAlt parentNode = gameObject.GetComponentInParent<OctreeNodeAlt>() as OctreeNodeAlt;
+						
+			//if there is no parent node...
+			if(parentNode != null)
+			{
+				//grab the parent node's volume renderer & collider
+				volRend = parentNode.volRend;
+				volColl = parentNode.volColl;
+			}
+			else
+			{
+				//Debug.Log ("Volume renderer and collider successfully passed to root.");
+				//otherwise I really hope this is the child of a Volume!
+				volRend  = gameObject.GetComponentInParent<VolumeRenderer>() as VolumeRenderer;
+				volColl = gameObject.GetComponentInParent<VolumeCollider>() as VolumeCollider;
+			}
+
+			//doing this will force all meshes to be rebuilt. Which will force the octreenode to ask "Do i have a volume renderer to even display this with?"
+			meshLastSyncronised = 0;
+
+			if(children == null) return;
+			
+			//this loop will iterate through all the children
+			for(uint i = 0; i < 8; i++)
+			{
+				if(children[i] != null)
+					children[i].RelayComponentChanges ();
+			}
+		}
+
+
 		
 		//The purpose of availableNodeSyncs is because: This function is recursive. availableNodeSyncs tells it how deep to plumb
 		/// <summary>

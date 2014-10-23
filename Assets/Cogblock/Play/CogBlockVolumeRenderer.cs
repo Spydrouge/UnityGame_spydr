@@ -17,13 +17,24 @@ namespace CogBlock
 	[ExecuteInEditMode]
 	public class CogBlockVolumeRenderer: VolumeRenderer
 	{
-		void Awake()
+		void Start()
 		{
 			if(material == null)
 			{
 				// This shader should be appropriate in most scenarios, and makes a good default.
 				material = Instantiate(Resources.Load("Materials/ColoredCubes", typeof(Material))) as Material;
 			}
+
+			OctreeNodeAlt toSync = gameObject.GetComponentInChildren<OctreeNodeAlt>() as OctreeNodeAlt;
+			if(toSync != null)
+			{
+				toSync.ForceSync();
+			}
 		}
+
+
+
+
+
 	}
 }
