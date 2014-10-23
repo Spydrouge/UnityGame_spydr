@@ -164,9 +164,13 @@ namespace CogBlock
 					rootOctreeNodeGameObject = rootOctreeNode.gameObject;
 				}
 
-				//Sync the Node and remember it will return syncs remaining. If some are remaining, the mesh is syncronized.
+				//Sync the Node and remember SyncNode will return syncs remaining. If some are remaining, the mesh is syncronized.
 				isMeshSyncronized = (rootOctreeNode.SyncNode(maxNodesPerSync) != 0);
 
+				//Where Sync nodes handles re-informed a bunch of nodes based on mesh changes, RelayComponentChanges assumes that something happened
+				//which every node of the octree needs to know about. By setting this flag = true, we can relay those changes quickly down through the whole tree. 
+				//of course since RelayComponentChanges doesn't really 'yield' after a certain number of units are updated, it is important to realize this function is
+				//called sparingly, usually only in edit mode, and should not perform incredibly complex per-update operations. 
 				if(RelayComponentChanges)
 				{
 					rootOctreeNode.RelayComponentChanges();

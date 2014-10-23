@@ -31,6 +31,21 @@ namespace CubSub
 				return new QuantizedColor(red, green, blue, alpha);
 			}
 
+			public static int DecQuant(QuantizedColor color)
+			{
+				return (int)(color.alpha + color.blue<<2 + color.green<<4 + color.red<<6);
+			}
+
+			public static int DecHex(String hex)
+			{
+				byte red = byte.Parse(hex.Substring(0,2), System.Globalization.NumberStyles.HexNumber);
+				byte green = byte.Parse(hex.Substring(2,2), System.Globalization.NumberStyles.HexNumber);
+				byte blue = byte.Parse(hex.Substring(4,2), System.Globalization.NumberStyles.HexNumber);
+				byte alpha = byte.Parse(hex.Substring(6,2), System.Globalization.NumberStyles.HexNumber);
+				
+				return (int)(alpha + blue<<2 + green<<4 + red<<6);
+			}
+			
 		}
 }
 

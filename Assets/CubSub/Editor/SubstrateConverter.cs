@@ -92,7 +92,7 @@ namespace CubSub
 			{46, HexColor.QuantHex("FF1C27FF")},	//TNT
 			{62, HexColor.QuantHex("2E2D2DFF")},	//Furnace
 			{81, HexColor.QuantHex("67ED00FF")},	//Cactus
-			{90, HexColor.QuantHex("C795F0FF")},	//Portal
+			{90, HexColor.QuantHex("C795F0FF")}	//Portal
 		};
 
 	
